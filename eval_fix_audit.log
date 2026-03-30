@@ -1,0 +1,64 @@
+Run 1 seed=101
+Rule   -> success=60.00% reward=-168.6861 steps=23.15
+RL     -> success=76.00% reward=-75.9921 steps=15.91
+Hybrid -> success=76.00% reward=-76.2641 steps=16.16
+Hybrid RL usage=96.97% | Rule override=3.03%
+
+Run 2 seed=202
+Rule   -> success=65.00% reward=-164.8992 steps=21.84
+RL     -> success=70.00% reward=-83.1021 steps=14.32
+Hybrid -> success=76.00% reward=-81.6875 steps=14.50
+Hybrid RL usage=96.07% | Rule override=3.93%
+
+Run 3 seed=303
+Rule   -> success=53.00% reward=-171.4092 steps=24.38
+RL     -> success=69.00% reward=-81.4959 steps=16.87
+Hybrid -> success=72.00% reward=-86.4291 steps=17.53
+Hybrid RL usage=97.32% | Rule override=2.68%
+
+Run 4 seed=404
+Rule   -> success=52.00% reward=-209.2521 steps=26.29
+RL     -> success=66.00% reward=-98.1325 steps=18.02
+Hybrid -> success=72.00% reward=-102.5353 steps=18.88
+Hybrid RL usage=96.77% | Rule override=3.23%
+
+Run 5 seed=505
+Rule   -> success=51.00% reward=-192.8013 steps=24.56
+RL     -> success=66.00% reward=-85.1880 steps=15.46
+Hybrid -> success=76.00% reward=-92.9449 steps=17.03
+Hybrid RL usage=96.07% | Rule override=3.93%
+
+Run 6 seed=606
+Rule   -> success=57.00% reward=-185.7778 steps=23.34
+RL     -> success=75.00% reward=-66.0043 steps=12.49
+Hybrid -> success=82.00% reward=-71.8768 steps=13.53
+Hybrid RL usage=96.30% | Rule override=3.70%
+
+Run 7 seed=707
+Rule   -> success=51.00% reward=-201.6122 steps=26.48
+RL     -> success=68.00% reward=-87.5150 steps=16.13
+Hybrid -> success=75.00% reward=-87.0025 steps=17.05
+Hybrid RL usage=96.72% | Rule override=3.28%
+
+Run 8 seed=808
+Rule   -> success=51.00% reward=-186.9658 steps=25.55
+RL     -> success=71.00% reward=-84.9287 steps=16.71
+Hybrid -> success=75.00% reward=-98.2532 steps=18.73
+Hybrid RL usage=96.32% | Rule override=3.68%
+
+========== ABLATION (8 runs x 100 episodes) ==========
+RULE: Success 55.00% +- 5.21 (95% CI +- 4.36), Reward -185.1755 +- 15.9647 (95% CI +- 13.3490), Steps 24.45 +- 1.62 (95% CI +- 1.36)
+RL: Success 70.12% +- 3.76 (95% CI +- 3.14), Reward -82.7948 +- 9.2411 (95% CI +- 7.7270), Steps 15.74 +- 1.70 (95% CI +- 1.42)
+HYBRID: Success 75.50% +- 3.12 (95% CI +- 2.61), Reward -87.1242 +- 10.5270 (95% CI +- 8.8022), Steps 16.68 +- 1.89 (95% CI +- 1.58)
+
+========== HYBRID POLICY USAGE ==========
+RL usage: 96.57% +- 0.45 (95% CI +- 0.38)
+Rule override: 3.43% +- 0.45 (95% CI +- 0.38)
+
+| Method | Success | Reward | Steps |
+|--------|--------:|-------:|------:|
+| Rule | 55.00% +- 5.21 | -185.1755 +- 15.9647 | 24.45 +- 1.62 |
+| RL | 70.12% +- 3.76 | -82.7948 +- 9.2411 | 15.74 +- 1.70 |
+| Hybrid | 75.50% +- 3.12 | -87.1242 +- 10.5270 | 16.68 +- 1.89 |
+
+Hybrid dominance vs Rule: 3/3 metrics

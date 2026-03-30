@@ -1,0 +1,48 @@
+/Users/rohhithg/Desktop/meta_project/.venv/lib/python3.14/site-packages/torch/_subclasses/functional_tensor.py:307: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+Run 1 seed=101
+Rule   -> success=60.00% reward=-772.2901 steps=22.89
+RL     -> success=70.00% reward=-284.9920 steps=13.37
+Hybrid -> success=74.00% reward=-361.2868 steps=15.93
+Hybrid RL usage=96.17% | Rule override=3.83%
+
+Run 2 seed=202
+Rule   -> success=65.00% reward=-768.8249 steps=21.63
+RL     -> success=67.00% reward=-315.6682 steps=12.92
+Hybrid -> success=71.00% reward=-394.4413 steps=15.34
+Hybrid RL usage=94.65% | Rule override=5.35%
+
+Run 3 seed=303
+Rule   -> success=53.00% reward=-785.9297 steps=24.24
+RL     -> success=66.00% reward=-304.7352 steps=14.56
+Hybrid -> success=70.00% reward=-363.7916 steps=16.68
+Hybrid RL usage=96.82% | Rule override=3.18%
+
+Run 4 seed=404
+Rule   -> success=52.00% reward=-937.0064 steps=25.70
+RL     -> success=66.00% reward=-355.5901 steps=15.63
+Hybrid -> success=68.00% reward=-441.9477 steps=17.93
+Hybrid RL usage=94.48% | Rule override=5.52%
+
+Run 5 seed=505
+Rule   -> success=51.00% reward=-857.9351 steps=24.01
+RL     -> success=59.00% reward=-343.9051 steps=16.40
+Hybrid -> success=63.00% reward=-414.2838 steps=17.74
+Hybrid RL usage=93.74% | Rule override=6.26%
+
+========== ABLATION (5 runs x 100 episodes) ==========
+RULE: Success 56.20% +- 5.42 (95% CI +- 4.75), Reward -824.3973 +- 64.9443 (95% CI +- 56.9262), Steps 23.69 +- 1.37 (95% CI +- 1.20)
+RL: Success 65.60% +- 3.61 (95% CI +- 3.17), Reward -320.9781 +- 25.7320 (95% CI +- 22.5550), Steps 14.58 +- 1.31 (95% CI +- 1.15)
+HYBRID: Success 69.20% +- 3.66 (95% CI +- 3.20), Reward -395.1502 +- 30.6160 (95% CI +- 26.8361), Steps 16.72 +- 1.00 (95% CI +- 0.88)
+
+========== HYBRID POLICY USAGE ==========
+RL usage: 95.17% +- 1.14 (95% CI +- 1.00)
+Rule override: 4.83% +- 1.14 (95% CI +- 1.00)
+
+| Method | Success | Reward | Steps |
+|--------|--------:|-------:|------:|
+| Rule | 56.20% +- 5.42 | -824.3973 +- 64.9443 | 23.69 +- 1.37 |
+| RL | 65.60% +- 3.61 | -320.9781 +- 25.7320 | 14.58 +- 1.31 |
+| Hybrid | 69.20% +- 3.66 | -395.1502 +- 30.6160 | 16.72 +- 1.00 |
+
+Hybrid dominance vs Rule: 3/3 metrics

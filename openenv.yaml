@@ -1,0 +1,20 @@
+name: ai-sre-recovery-system
+
+entry_point: inference.py
+
+environment:
+  python: 3.10
+
+evaluation:
+  metric: final_score
+  goal: maximize
+
+tasks:
+  - tasks.easy_task:get_easy_task
+  - tasks.medium_task:get_medium_task
+  - tasks.hard_task:get_hard_task
+
+grader:
+  easy: graders.easy_grader:grade_easy
+  medium: graders.medium_grader:grade_medium
+  hard: graders.hard_grader:grade_hard

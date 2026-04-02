@@ -16,7 +16,7 @@ def run_task(task, grader):
     print(f"\n=== Running: {task['name']} ===")
 
     for step in range(task["max_steps"]):
-        state, reward, done, info = env.step(0)
+        state, reward, done, _ = env.step(0)
 
         score = grader(state)
 

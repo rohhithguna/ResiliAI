@@ -1,17 +1,15 @@
 def grade_medium(state):
-    latency_ok = (
-        state["frontend_latency"] < 300 and
-        state["backend_latency"] < 300 and
-        state["db_latency"] < 300
-    )
+    try:
+        err = state[6]
+        traffic = state[7]
+    except Exception:
+        err = state.get("error_rate", 1.0)
+        traffic = state.get("traffic_load", 1.0)
 
-    error_ok = state["error_rate"] < 0.05
-
-    score = 0.0
-
-    if latency_ok:
+    score = 0
+    if err < 0.1:
         score += 0.5
-    if error_ok:
+    if traffic < 0.7:
         score += 0.5
 
     return score

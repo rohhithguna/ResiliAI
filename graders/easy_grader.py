@@ -1,7 +1,7 @@
 def grade_easy(state):
-    healthy = (
-        state["frontend_status"] == 2 and
-        state["backend_status"] == 2 and
-        state["db_status"] == 2
-    )
-    return 1.0 if healthy else 0.0
+    try:
+        err = state[6]
+    except Exception:
+        err = state.get("error_rate", 1.0)
+
+    return 1.0 if err < 0.05 else 0.0

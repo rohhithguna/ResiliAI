@@ -19,11 +19,13 @@ class RuleAgent:
         error_rate = state[6]
 
         if db_status == 0:
+            print("[WARN] Database failure -> Restart Database")
             return 3  # Restart DB
         if b_status == 0:
             return 2  # Restart B
         if a_status == 0:
             return 1  # Restart A
         if error_rate > 0.3:
+            print("[WARN] Traffic issue -> Throttle Traffic")
             return 4  # Throttle traffic
         return 0  # No-op

@@ -38,6 +38,7 @@ class BackendAgent:
 class DatabaseAgent:
     def suggest(self, obs):
         if obs["db_status"] == 0 or obs["db_latency"] > 800:
+            print("[WARN] Database failure -> Restart Database")
             return 3
         return None
 
@@ -45,6 +46,7 @@ class DatabaseAgent:
 class TrafficAgent:
     def suggest(self, obs):
         if obs["traffic_load"] > 0.85 or obs["error_rate"] > 0.3:
+            print("[WARN] Traffic issue -> Throttle Traffic")
             return 4
         return None
 

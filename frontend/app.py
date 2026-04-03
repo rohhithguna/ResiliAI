@@ -1,4 +1,13 @@
+import sys
+from pathlib import Path
+
 import streamlit as st
+
+# Ensure imports work whether Streamlit is launched from repo root or frontend/.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.env.sre_openenv import SREOpenEnv
 from src.inference.inference import select_action, get_usage_stats
 
@@ -54,15 +63,94 @@ def _run_rule_baseline(scenario, max_steps=40):
     }
 
 def render_status(val):
-    """Convert numeric status to emoji badge."""
+    """Convert numeric status to colored HTML text."""
     if int(val) == 2:
-        return "🟢 Healthy"
+        return '<span style="color:#22c55e">● Healthy</span>'
     elif int(val) == 1:
-        return "🟡 Degraded"
+        return '<span style="color:#facc15">● Degraded</span>'
     else:
-        return "🔴 Down"
+        return '<span style="color:#ef4444">● Down</span>'
+
+def latency_note(val):
+    try:
+        fval = float(val)
+        if fval < 200: return "Normal"
+        elif fval < 800: return "Elevated"
+        else: return "Critical"
+    except:
+        return "N/A"
 
 st.set_page_config(page_title="AI SRE System", layout="wide")
+
+st.markdown("""
+<style>
+/* Background */
+[data-testid="stAppViewContainer"] {
+    background-color: #0f1117;
+    color: #ffffff;
+}
+
+/* Floating top bar background */
+.navbar-fake {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(15,17,23,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    z-index: 999;
+}
+
+/* Push page content below navbar */
+.block-container {
+    background: transparent;
+    padding-top: 90px !important;
+}
+
+/* Headers */
+h1, h2, h3 {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Text */
+p, span, div {
+    color: #d1d5db;
+}
+
+.card {
+    background: #111827;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 12px;
+}
+
+.metric-container {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff !important;
+}
+
+/* Button styling */
+.stButton button {
+    background: #1f2937;
+    color: white;
+    border-radius: 10px !important;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+.stButton button:hover {
+    background: #374151;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Floating navbar visual background layer
+st.markdown('<div class="navbar-fake"></div>', unsafe_allow_html=True)
 
 st.title("AI System for Autonomous Incident Recovery")
 
@@ -82,14 +170,27 @@ if "env" not in st.session_state:
 if "error_history" not in st.session_state:
     st.session_state.error_history = []
 
-# --------------------------------
-# CONTROLS
-# --------------------------------
-st.subheader("Controls")
-col1, col2, col3 = st.columns(3)
+# Evaluate current error for the System Status Banner
+state = st.session_state.state
+try:
+    current_error_for_banner = state[6]
+except Exception:
+    current_error_for_banner = state.get("error_rate", 1.0) if isinstance(state, dict) else 1.0
 
-with col1:
-    if st.button("Start / Reset"):
+if current_error_for_banner < 0.05:
+    st.success("System Status: System Stable")
+elif current_error_for_banner < 0.2:
+    st.warning("System Status: System Degraded")
+else:
+    st.error("System Status: System Critical")
+
+# --------------------------------
+# CONTROL PANEL (TOP)
+# --------------------------------
+nav1, nav2, nav3, nav4 = st.columns(4)
+
+with nav1:
+    if st.button("Start", use_container_width=True):
         st.session_state.env = SREOpenEnv(seed=42)
         st.session_state.state = st.session_state.env.reset()
         st.session_state.step = 0
@@ -98,283 +199,250 @@ with col1:
         st.session_state.error_history = [_safe_get_error(st.session_state.state)]
         st.session_state.scenario = "None"
         st.session_state.rule_baseline = None
+        st.session_state.initial_error = _safe_get_error(st.session_state.state)
+        st.success("System initialized")
 
-with col2:
-    if st.button("Next Step"):
+with nav2:
+    if st.button("Step", use_container_width=True):
         action = select_action(st.session_state.state)
         new_state, reward, done, _ = st.session_state.env.step(action)
-
         st.session_state.log = st.session_state.log[-9:]
-        st.session_state.log.append({
-            "step": st.session_state.step,
-            "action": action,
-            "reward": reward
-        })
-
+        st.session_state.log.append({"step": st.session_state.step, "action": action, "reward": reward})
         st.session_state.state = new_state
         st.session_state.step += 1
         st.session_state.error_history.append(_safe_get_error(new_state))
-
-        # Safe done condition: only mark complete on done with low error.
-        try:
-            err = new_state[6]
-        except Exception:
-            err = new_state.get("error_rate", 1.0)
-
+        try: err = new_state[6]
+        except Exception: err = new_state.get("error_rate", 1.0)
         st.session_state.done = bool(done and err < 0.05)
 
-with col3:
-    if st.button("Auto Run (10 steps)"):
+with nav3:
+    if st.button("Auto", use_container_width=True):
         for _ in range(10):
             action = select_action(st.session_state.state)
             new_state, reward, done, _ = st.session_state.env.step(action)
-
             st.session_state.log = st.session_state.log[-9:]
-            st.session_state.log.append({
-                "step": st.session_state.step,
-                "action": action,
-                "reward": reward
-            })
-
+            st.session_state.log.append({"step": st.session_state.step, "action": action, "reward": reward})
             st.session_state.state = new_state
             st.session_state.step += 1
             st.session_state.error_history.append(_safe_get_error(new_state))
-
-            # Safe stop condition for successful recovery.
-            try:
-                err = new_state[6]
-            except Exception:
-                err = new_state.get("error_rate", 1.0)
-
+            try: err = new_state[6]
+            except Exception: err = new_state.get("error_rate", 1.0)
             if done and err < 0.05:
                 st.session_state.done = True
                 break
+        st.info("Running automated recovery...")
 
-if st.button("Run Extreme Scenario"):
-    st.session_state.scenario = st.session_state.env.inject_scenario("extreme_failure")
-    st.session_state.state = st.session_state.env.state()
-    st.session_state.initial_error = st.session_state.state.get("error_rate", 1.0)
-    st.session_state.done = False
-    st.session_state.step = 0
-    st.session_state.log = []
-    st.session_state.error_history = [_safe_get_error(st.session_state.state)]
-    st.session_state.rule_baseline = _run_rule_baseline("extreme_failure")
-    st.success("Extreme scenario injected. Monitoring gradual stabilization.")
-
-# --------------------------------
-# DISPLAY STATE
-# --------------------------------
-state = st.session_state.state
-
-st.subheader("System State")
-try:
-    if any(int(state[i]) == 0 for i in [0,1,2]):
-        st.error("⚠ Critical Failure Detected")
-except (KeyError, TypeError, IndexError):
-    # Handle dict-style state
-    if isinstance(state, dict):
-        has_failure = any(int(state.get(k, 2)) == 0 for k in ["frontend_status", "backend_status", "db_status"])
-        if has_failure:
-            st.error("⚠ Critical Failure Detected")
-
-
-
-try:
-    frontend, backend, db = render_status(state[0]), render_status(state[1]), render_status(state[2])
-    fl, bl, dl = state[3], state[4], state[5]
-    err, traffic = state[6], state[7]
-except Exception:
-    frontend = render_status(state.get("frontend_status", 0))
-    backend = render_status(state.get("backend_status", 0))
-    db = render_status(state.get("db_status", 0))
-    fl = state.get("frontend_latency", 0)
-    bl = state.get("backend_latency", 0)
-    dl = state.get("db_latency", 0)
-    err = state.get("error_rate", 1)
-    traffic = state.get("traffic_load", 0)
-
-col1, col2, col3 = st.columns(3)
-
-col1.metric("Frontend", frontend)
-col2.metric("Backend", backend)
-col3.metric("Database", db)
-
-col4, col5 = st.columns(2)
-col4.metric("Error Rate", f"{err:.3f}")
-col5.metric("Traffic", f"{traffic:.3f}")
-
-# --------------------------------
-# LOG
-# --------------------------------
-st.subheader("AI Decision Insight")
-
-last_action = st.session_state.log[-1]["action"] if st.session_state.log else None
-
-ACTION_REASON = {
-    0: "System stable → monitoring",
-    1: "Frontend issue detected → restarting frontend",
-    2: "Backend instability → restarting backend",
-    3: "Database failure → highest priority restart",
-    4: "High load → throttling traffic",
-    5: "System imbalance → rebalancing traffic"
-}
-
-if last_action is not None:
-    st.info(ACTION_REASON.get(last_action, "Monitoring system"))
-
-st.subheader("Recent Actions")
-
-if st.session_state.log:
-    st.table(st.session_state.log[-10:])
-else:
-    st.write("No actions yet")
-
-# --------------------------------
-# STATUS
-# --------------------------------
-if st.session_state.done:
-    if err < 0.05:
-        st.success("System Recovered")
-    else:
-        st.warning("Finished but not fully recovered")
-
-
-
-st.subheader("Performance Summary")
-
-state = st.session_state.state
-steps = st.session_state.step
-try:
-    error = state[6]
-except:
-    error = state.get("error_rate", 1.0) if isinstance(state, dict) else 1.0
-
-if error < 0.01:
-    st.success(f"✅ Recovered in {steps} steps with low error rate {error:.3f}")
-elif error < 0.05:
-    st.warning(f"⚠️ Partially stable after {steps} steps (error: {error:.3f}). Recovered in {steps} steps to near-stable state.")
-else:
-    st.error(f"❌ System not stable (error: {error:.3f})")
-
-st.subheader("Error Rate Reduction Over Time")
-if st.session_state.error_history:
-    st.line_chart(st.session_state.error_history)
-else:
-    st.info("No error history yet. Run a few steps to visualize reduction.")
-
-
-
-# --------------------------------
-# SCENARIO SELECTION
-# --------------------------------
-st.sidebar.subheader("Configuration")
-
-scenario_option = st.sidebar.selectbox(
-    "Select Scenario",
-    ["None (Healthy)", "traffic_spike", "db_failure", "multi_failure", "extreme_failure"],
-    help="Choose an incident scenario to simulate"
-)
-
-# Inject scenario on reset
-if "scenario" not in st.session_state:
-    st.session_state.scenario = "None"
-
-if st.sidebar.button("Apply Scenario"):
-    if scenario_option != "None (Healthy)":
-        st.session_state.env.inject_scenario(scenario_option)
+with nav4:
+    if st.button("Extreme", use_container_width=True):
+        st.session_state.scenario = st.session_state.env.inject_scenario("extreme_failure")
         st.session_state.state = st.session_state.env.state()
-        st.session_state.scenario = scenario_option
-        st.session_state.initial_error = st.session_state.state.get("error_rate", 1.0)
+        st.session_state.initial_error = _safe_get_error(st.session_state.state)
+        st.session_state.done = False
         st.session_state.step = 0
         st.session_state.log = []
         st.session_state.error_history = [_safe_get_error(st.session_state.state)]
-        st.session_state.rule_baseline = _run_rule_baseline(scenario_option)
-        st.success(f"✅ Scenario '{scenario_option}' applied!")
-    else:
-        st.session_state.scenario = "None"
-        st.session_state.rule_baseline = _run_rule_baseline("None")
-        st.info("System is healthy")
+        st.session_state.rule_baseline = _run_rule_baseline("extreme_failure")
+        st.error("Extreme failure injected")
 
-
-
-# --------------------------------
-# PERFORMANCE METRICS
-# --------------------------------
-if st.session_state.step > 0 or "initial_error" in st.session_state:
-    st.subheader("Performance Metrics")
-    st.caption("*Metrics from current run. System performance is validated across multiple seeded runs for consistency.*")
-    
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    
-    with col_m1:
-        if "initial_error" in st.session_state:
-            st.metric("Initial Error", f"{st.session_state.initial_error:.3f}")
-        else:
-            st.metric("Initial Error", "N/A")
-    
-    with col_m2:
-        current_error = state.get("error_rate", 1.0) if isinstance(state, dict) else state[6]
-        st.metric("Current Error", f"{current_error:.3f}")
-    
-    with col_m3:
-        if "initial_error" in st.session_state:
-            improvement = st.session_state.initial_error - (state.get("error_rate", 1.0) if isinstance(state, dict) else state[6])
-            st.metric("Improvement", f"{improvement:.3f}")
-        else:
-            st.metric("Improvement", "N/A")
-    
-    with col_m4:
-        st.metric("Steps Taken", st.session_state.step)
-
-usage = get_usage_stats()
-col_u1, col_u2 = st.columns(2)
-with col_u1:
-    st.metric("RL Usage %", f"{usage['rl_usage_pct']:.1f}%")
-with col_u2:
-    st.metric("Rule Override %", f"{usage['rule_usage_pct']:.1f}%")
-
-if usage["rl_usage_pct"] > 80.0:
-    st.success("RL Usage target met: above 80%")
-elif usage["rl_used"] + usage["rule_used"] > 0:
-    st.warning("RL Usage target not yet met (expected > 80%).")
-
-st.subheader("AI vs Rule Comparison")
-if st.session_state.get("rule_baseline") is None:
-    st.session_state.rule_baseline = _run_rule_baseline(st.session_state.get("scenario", "None"))
-
-baseline = st.session_state.rule_baseline
-cmp_col1, cmp_col2 = st.columns(2)
-with cmp_col1:
-    st.metric("AI Steps", st.session_state.step)
-    st.metric("Rule Steps", baseline["steps"])
-with cmp_col2:
-    st.metric("AI Final Error", f"{error:.3f}")
-    st.metric("Rule Final Error", f"{baseline['final_error']:.3f}")
-
-
-
-# --------------------------------
-# POLICY INSIGHTS
-# --------------------------------
-st.subheader("Decision Strategy")
-
+# Active State feedback
 if st.session_state.log:
-    last_action = st.session_state.log[-1]["action"] if st.session_state.log else None
-    
-    if last_action is not None:
-        action_names = {
-            0: "🟢 Monitoring",
-            1: "🔄 Frontend Restart",
-            2: "🔄 Backend Restart",
-            3: "🔄 Database Restart",
-            4: "🚦 Traffic Throttle",
-            5: "⚖️  Load Rebalance"
-        }
+    last_act = st.session_state.log[-1]["action"]
+    act_name = {
+            0: "Monitor Strategy",
+            1: "Restart Frontend",
+            2: "Restart Backend",
+            3: "Restart Database",
+            4: "Throttle Traffic",
+            5: "Rebalance Load"
+    }.get(last_act, "Unknown Action")
+    st.markdown(f'<div style="text-align: center; color: #a1a1aa; margin-bottom: 20px;">Last Action: {act_name}</div>', unsafe_allow_html=True)
+
+# --------------------------------
+# SYSTEM STATE & GRAPH (MIDDLE)
+# --------------------------------
+row2 = st.columns([1,1])
+row3 = st.columns([1,1])
+with row2[0]:
+    st.subheader("System Health")
+    state = st.session_state.state
+
+    try:
+        frontend, backend, db = render_status(state[0]), render_status(state[1]), render_status(state[2])
+        fl, bl, dl = state[3], state[4], state[5]
+        lb_status_raw = state[8] if len(state) > 8 else None
+        lb_latency_raw = state[9] if len(state) > 9 else None
+    except Exception:
+        frontend = render_status(state.get("frontend_status", 0))
+        backend = render_status(state.get("backend_status", 0))
+        db = render_status(state.get("db_status", 0))
+        fl = state.get("frontend_latency", 0)
+        bl = state.get("backend_latency", 0)
+        dl = state.get("db_latency", 0)
+        lb_status_raw = state.get("load_balancer_status", state.get("lb_status"))
+        lb_latency_raw = state.get("load_balancer_latency", state.get("lb_latency"))
+
+    lb_status = render_status(lb_status_raw) if lb_status_raw is not None else '<span style="color:#d1d5db">⚪ Unknown</span>'
+    lb_latency = float(lb_latency_raw) if lb_latency_raw is not None else 0.0
+
+    hc1, hc2, hc3, hc4 = st.columns(4)
+    with hc1:
+        st.markdown(f"""
+        <div class="card">
+            <h3 style="margin: 0; font-size: 18px;">Frontend</h3>
+            <div>{frontend}</div>
+            <div style="margin-top: 8px;">Latency: {float(fl):.0f} ms</div>
+            <div style="font-size: 14px; opacity: 0.8;">{latency_note(fl)}</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        st.info(f"Last Action: {action_names.get(last_action, 'Unknown')}")
-        st.write("This hybrid AI/Rule system intelligently combines:")
-        st.write("- **AI Agent**: Adaptive responses informed by reinforcement learning")
-        st.write("- **Rule Engine**: Critical failure prioritization and safety overrides")
-        st.write("- **Validation**: System performance is validated across multiple scenarios with seeded runs")
-else:
-    st.info("No actions taken yet. Click 'Start / Reset' to begin.")
+    with hc2:
+        st.markdown(f"""
+        <div class="card">
+            <h3 style="margin: 0; font-size: 18px;">Backend</h3>
+            <div>{backend}</div>
+            <div style="margin-top: 8px;">Latency: {float(bl):.0f} ms</div>
+            <div style="font-size: 14px; opacity: 0.8;">{latency_note(bl)}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with hc3:
+        st.markdown(f"""
+        <div class="card">
+            <h3 style="margin: 0; font-size: 18px;">Database</h3>
+            <div>{db}</div>
+            <div style="margin-top: 8px;">Latency: {float(dl):.0f} ms</div>
+            <div style="font-size: 14px; opacity: 0.8;">{latency_note(dl)}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with hc4:
+        lb_note = latency_note(lb_latency) if lb_status_raw is not None else "N/A"
+        lb_lat_str = f"Latency: {float(lb_latency):.0f} ms" if lb_status_raw is not None else "Latency: N/A"
+        st.markdown(f"""
+        <div class="card">
+            <h3 style="margin: 0; font-size: 18px;">Load Balancer</h3>
+            <div>{lb_status}</div>
+            <div style="margin-top: 8px;">{lb_lat_str}</div>
+            <div style="font-size: 14px; opacity: 0.8;">{lb_note}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+with row2[1]:
+    st.subheader("Error Reduction Over Time")
+    if st.session_state.error_history:
+        st.line_chart(st.session_state.error_history)
+    else:
+        st.info("No error history yet.")
+
+# --------------------------------
+# INSIGHTS & METRICS (BOTTOM)
+# --------------------------------
+with row3[0]:
+    st.subheader("AI Decision Insight")
+    last_action = st.session_state.log[-1]["action"] if st.session_state.log else None
+
+    if last_action is not None:
+        action_title = {
+            0: "Monitor Strategy",
+            1: "Restart Frontend",
+            2: "Restart Backend",
+            3: "Restart Database",
+            4: "Throttle Traffic",
+            5: "Rebalance Load"
+        }.get(last_action, "Unknown Action")
+        
+        reason = {
+            0: "System is stable, analyzing metrics",
+            1: "Frontend is down, causing dropped connections",
+            2: "Backend latency elevated, restarting resolves memory leak",
+            3: "Database is down, causing high system error",
+            4: "High traffic detected, mitigating overload",
+            5: "Uneven distribution detected, forcing load proxy refresh"
+        }.get(last_action, "No reason defined")
+
+        st.markdown(f"""
+        <div class="card">
+            <h3 style="margin: 0; font-size: 18px;">Action: {action_title}</h3>
+            <p style="margin-top: 8px; font-size: 15px;">Reason: "{reason}"</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="card">Monitoring system...</div>', unsafe_allow_html=True)
+
+with row3[1]:
+    st.subheader("Performance Metrics")
+    state = st.session_state.state
+    try:
+        error = state[6]
+        traffic = state[7]
+    except:
+        error = state.get("error_rate", 1.0) if isinstance(state, dict) else 1.0
+        traffic = state.get("traffic_load", 0.0) if isinstance(state, dict) else 0.0
+
+    if error < 0.05:
+        error_status = "Stable"
+    elif error < 0.2:
+        error_status = "Warning"
+    else:
+        error_status = "Critical"
+
+    if traffic < 0.3:
+        traffic_status = "Low"
+    elif traffic < 0.7:
+        traffic_status = "Moderate Load"
+    else:
+        traffic_status = "High Load"
+
+    usage = get_usage_stats()
+    
+    col_p1, col_p2, col_p3 = st.columns(3)
+    
+    with col_p1:
+        st.markdown(f"""
+        <div class="card">
+            <div style="font-size: 14px; opacity: 0.8;">RL Usage %</div>
+            <div class="metric-container">{usage['rl_usage_pct']:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col_p2:
+        st.markdown(f"""
+        <div class="card">
+            <div style="font-size: 14px; opacity: 0.8;">Steps</div>
+            <div class="metric-container">{st.session_state.step}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col_p3:
+        if "initial_error" in st.session_state:
+            orig_err = st.session_state.initial_error
+            imp_val = ((orig_err - error) / orig_err * 100.0) if orig_err > 0 else 0.0
+            imp_str = f"{imp_val:.0f}%"
+        else:
+            imp_str = "N/A"
+            
+        st.markdown(f"""
+        <div class="card">
+            <div style="font-size: 14px; opacity: 0.8;">Improvement</div>
+            <div class="metric-container">{imp_str}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    ec1, ec2 = st.columns(2)
+    with ec1:
+        st.markdown(f"""
+        <div class="card">
+            <div style="font-size: 14px; opacity: 0.8;">System Error</div>
+            <div class="metric-container">{error:.3f}</div>
+            <div style="font-size: 14px; margin-top: 4px;">Status: <span style="color:#ffffff">{error_status}</span></div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with ec2:
+        st.markdown(f"""
+        <div class="card">
+            <div style="font-size: 14px; opacity: 0.8;">System Traffic</div>
+            <div class="metric-container">{traffic:.3f}</div>
+            <div style="font-size: 14px; margin-top: 4px;">Load: <span style="color:#ffffff">{traffic_status}</span></div>
+        </div>
+        """, unsafe_allow_html=True)

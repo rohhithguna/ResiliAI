@@ -10,7 +10,7 @@ ACTIONS = {
 
 class SREOpenEnv:
     def __init__(self, seed=None):
-        from sre_environment import SREEnvironment
+        from src.env.sre_environment import SREEnvironment
         self.env = SREEnvironment(seed=seed)
         self.step_count = 0
         if not hasattr(self.env, "current_state"):
@@ -39,6 +39,43 @@ class SREOpenEnv:
             return self._format_obs(self.env.current_state)
         else:
             return self._format_obs(self.env._get_state() if hasattr(self.env, "_get_state") else self.env.reset())
+
+    def inject_scenario(self, scenario: str = None):
+        """Inject a realistic failure scenario into the environment.
+        
+        Scenarios:
+        - 'traffic_spike': High traffic load with elevated error rate
+        - 'db_failure': Database down with critical error rate
+        - 'multi_failure': Multiple component failures (highest severity)
+        - None/random: Randomly choose a scenario
+        """
+        import random
+        
+        if scenario is None:
+            scenario = random.choice(["traffic_spike", "db_failure", "multi_failure", "extreme_failure"])
+        
+        if scenario == "traffic_spike":
+            self.env.global_traffic_load = 0.9
+            self.env.global_error_rate = 0.4
+            self.env.request_queue = 800.0
+        
+        elif scenario == "db_failure":
+            self.env.db_status = self.env.STATUS_DOWN
+            self.env.db_latency = 2000.0
+            self.env.global_error_rate = 0.6
+        
+        elif scenario == "multi_failure":
+            self.env.a_status = self.env.STATUS_DEGRADED
+            self.env.b_status = self.env.STATUS_DOWN
+            self.env.db_status = self.env.STATUS_DEGRADED
+            self.env.global_error_rate = 0.7
+
+        elif scenario == "extreme_failure":
+            scenario = self.env.extreme_scenario()
+        
+        # Update current state
+        self.env.current_state = self.env._get_state()
+        return scenario
 
     def _format_obs(self, state):
         return {

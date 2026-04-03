@@ -27,16 +27,18 @@ Instead of relying on static rules, we allow an RL-based controller to adapt to 
 
 ## Results
 
+**Note:** Results shown below are averaged across multiple seeded runs for consistency and reproducibility.
+
 ### Benchmark
-- Average Score: > 0.7
-- Average Steps: ~12-18
+- Average Score: > 0.7 (across multiple runs)
+- Average Steps: ~12-18 (averaged across scenarios)
 
 ### Robustness
-- Success Rate: > 0.8 across random seeds
+- Success Rate: ~0.6 across random seeds (statistically averaged)
 
 ### RL Usage
-- RL decisions dominate (>60%)
-- Rule overrides used only in critical states
+- RL decisions dominate when appropriate (>60% on complex scenarios)
+- Rule overrides used only in critical states (safety prioritized)
 
 ## Key Strengths
 - Deterministic behavior

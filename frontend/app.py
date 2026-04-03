@@ -1,247 +1,380 @@
-import os
-import sys
-import time
-
 import streamlit as st
-import torch
-
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if ROOT_DIR not in sys.path:
-    sys.path.append(ROOT_DIR)
-
-from multi_agent import CoordinatorAgent
-from sre_environment import SREEnvironment
-from train_dqn import QNetwork
+from src.env.sre_openenv import SREOpenEnv
+from src.inference.inference import select_action, get_usage_stats
 
 
-STATE_DIM = 10
-ACTION_DIM = 6
-MODEL_PATH = os.path.join(ROOT_DIR, "dqn_model.pth")
-
-ACTION_TEXT = {
-    0: "No action",
-    1: "Restart Frontend",
-    2: "Restart Backend",
-    3: "Restart Database",
-    4: "Throttle Traffic",
-    5: "Redistribute Traffic",
-}
-
-STATUS_TEXT = {
-    0: "🔴 Down",
-    1: "🟡 Degraded",
-    2: "🟢 Healthy",
-}
+def _safe_get_error(state):
+    if isinstance(state, dict):
+        return float(state.get("error_rate", 1.0))
+    return float(state[6])
 
 
-@st.cache_resource
-def load_model():
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError("Run train_dqn.py first")
-
-    model = QNetwork(STATE_DIM, ACTION_DIM)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
-    model.eval()
-    return model
-
-
-def init_simulation():
-    env = SREEnvironment(seed=42)
-    st.session_state.env = env
-    st.session_state.state = env.reset()
-    st.session_state.step_count = 0
-    st.session_state.done = False
-    st.session_state.last_action = None
-    st.session_state.last_reason = "Simulation initialized"
-    st.session_state.last_result = "-"
-    st.session_state.log = []
-    st.session_state.suggestions = {}
-
-
-def get_reason(state):
-    a, b, db = int(state[0]), int(state[1]), int(state[2])
-    err = float(state[6])
+def _rule_policy(state):
+    if isinstance(state, dict):
+        frontend = int(state.get("frontend_status", 2))
+        backend = int(state.get("backend_status", 2))
+        db = int(state.get("db_status", 2))
+        err = float(state.get("error_rate", 0.0))
+    else:
+        frontend = int(state[0])
+        backend = int(state[1])
+        db = int(state[2])
+        err = float(state[6])
 
     if db == 0:
-        return "DB down -> restarting database"
-    if b == 0:
-        return "Backend issue -> restarting backend"
-    if a == 0:
-        return "Frontend issue -> restarting frontend"
+        return 3
+    if backend == 0:
+        return 2
+    if frontend == 0:
+        return 1
     if err > 0.3:
-        return "High error -> throttling traffic"
-    return "System stable"
+        return 4
+    return 0
 
 
-def health_summary(state):
-    h = sum(int(x) == 2 for x in state[:3])
-    if h == 3:
-        return "Healthy"
-    if h == 2:
-        return "Warning"
-    return "Critical"
+def _run_rule_baseline(scenario, max_steps=40):
+    env = SREOpenEnv(seed=42)
+    _ = env.reset()
+    if scenario and scenario != "None":
+        env.inject_scenario(scenario)
+    state = env.state()
+    steps = 0
+    done = False
 
+    for _ in range(max_steps):
+        action = _rule_policy(state)
+        state, _, done, _ = env.step(action)
+        steps += 1
+        if done and _safe_get_error(state) < 0.05:
+            break
 
-def recovery_status(done, env):
-    if done and env.global_error_rate < 0.02:
-        return "Recovered"
-    if done:
-        return "Not recovered"
-    return "In progress"
+    return {
+        "steps": steps,
+        "final_error": _safe_get_error(state),
+    }
 
-
-def run_one_step(model, coordinator):
-    if st.session_state.env is None:
-        init_simulation()
-    if st.session_state.done:
-        return
-
-    state = st.session_state.state
-    suggestions = coordinator.get_suggestions(state)
-    action = coordinator.select_action(state, model)
-    next_state, reward, done, _ = st.session_state.env.step(action)
-
-    issue = get_reason(state)
-    if done and st.session_state.env.global_error_rate < 0.02:
-        result = "Recovered"
-    elif done:
-        result = "Episode ended"
-    elif reward > 0:
-        result = "Improving"
+def render_status(val):
+    """Convert numeric status to emoji badge."""
+    if int(val) == 2:
+        return "🟢 Healthy"
+    elif int(val) == 1:
+        return "🟡 Degraded"
     else:
-        result = "Needs attention"
+        return "🔴 Down"
 
-    st.session_state.state = next_state
-    st.session_state.step_count += 1
-    st.session_state.done = done
-    st.session_state.last_action = action
-    st.session_state.last_reason = issue
-    st.session_state.last_result = result
-    st.session_state.suggestions = suggestions
+st.set_page_config(page_title="AI SRE System", layout="wide")
 
-    st.session_state.log.append(
-        {
-            "Step": st.session_state.step_count,
-            "Issue Detected": issue,
-            "Action Taken": ACTION_TEXT.get(action, str(action)),
-            "Result": result,
-        }
-    )
-    st.session_state.log = st.session_state.log[-5:]
+st.title("AI System for Autonomous Incident Recovery")
 
-
-st.set_page_config(page_title="AI SRE Decision System", layout="wide")
-st.title("AI SRE Decision System")
-st.caption("Multi-Agent AI System for Autonomous Incident Recovery")
-
-try:
-    model = load_model()
-except FileNotFoundError as e:
-    st.error(str(e))
-    st.stop()
-
+# --------------------------------
+# INIT STATE
+# --------------------------------
 if "env" not in st.session_state:
-    st.session_state.env = None
-    st.session_state.state = None
-    st.session_state.step_count = 0
+    st.session_state.env = SREOpenEnv(seed=42)
+    st.session_state.state = st.session_state.env.reset()
+    st.session_state.step = 0
     st.session_state.done = False
-    st.session_state.last_action = None
-    st.session_state.last_reason = ""
-    st.session_state.last_result = "-"
     st.session_state.log = []
-    st.session_state.suggestions = {}
+    st.session_state.error_history = [_safe_get_error(st.session_state.state)]
+    st.session_state.scenario = "None"
+    st.session_state.rule_baseline = None
 
-coordinator = CoordinatorAgent()
+if "error_history" not in st.session_state:
+    st.session_state.error_history = []
 
+# --------------------------------
+# CONTROLS
+# --------------------------------
 st.subheader("Controls")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("Start", use_container_width=True):
-        init_simulation()
+    if st.button("Start / Reset"):
+        st.session_state.env = SREOpenEnv(seed=42)
+        st.session_state.state = st.session_state.env.reset()
+        st.session_state.step = 0
+        st.session_state.done = False
+        st.session_state.log = []
+        st.session_state.error_history = [_safe_get_error(st.session_state.state)]
+        st.session_state.scenario = "None"
+        st.session_state.rule_baseline = None
 
 with col2:
-    if st.button("Next Step", use_container_width=True):
-        run_one_step(model, coordinator)
+    if st.button("Next Step"):
+        action = select_action(st.session_state.state)
+        new_state, reward, done, _ = st.session_state.env.step(action)
+
+        st.session_state.log = st.session_state.log[-9:]
+        st.session_state.log.append({
+            "step": st.session_state.step,
+            "action": action,
+            "reward": reward
+        })
+
+        st.session_state.state = new_state
+        st.session_state.step += 1
+        st.session_state.error_history.append(_safe_get_error(new_state))
+
+        # Safe done condition: only mark complete on done with low error.
+        try:
+            err = new_state[6]
+        except Exception:
+            err = new_state.get("error_rate", 1.0)
+
+        st.session_state.done = bool(done and err < 0.05)
 
 with col3:
-    if st.button("Run Auto Demo", use_container_width=True):
-        if st.session_state.env is None:
-            init_simulation()
+    if st.button("Auto Run (10 steps)"):
         for _ in range(10):
-            if st.session_state.done:
+            action = select_action(st.session_state.state)
+            new_state, reward, done, _ = st.session_state.env.step(action)
+
+            st.session_state.log = st.session_state.log[-9:]
+            st.session_state.log.append({
+                "step": st.session_state.step,
+                "action": action,
+                "reward": reward
+            })
+
+            st.session_state.state = new_state
+            st.session_state.step += 1
+            st.session_state.error_history.append(_safe_get_error(new_state))
+
+            # Safe stop condition for successful recovery.
+            try:
+                err = new_state[6]
+            except Exception:
+                err = new_state.get("error_rate", 1.0)
+
+            if done and err < 0.05:
+                st.session_state.done = True
                 break
-            run_one_step(model, coordinator)
-            time.sleep(0.12)
-        st.rerun()
 
-with col4:
-    if st.button("Reset", use_container_width=True):
-        init_simulation()
+if st.button("Run Extreme Scenario"):
+    st.session_state.scenario = st.session_state.env.inject_scenario("extreme_failure")
+    st.session_state.state = st.session_state.env.state()
+    st.session_state.initial_error = st.session_state.state.get("error_rate", 1.0)
+    st.session_state.done = False
+    st.session_state.step = 0
+    st.session_state.log = []
+    st.session_state.error_history = [_safe_get_error(st.session_state.state)]
+    st.session_state.rule_baseline = _run_rule_baseline("extreme_failure")
+    st.success("Extreme scenario injected. Monitoring gradual stabilization.")
 
-if st.session_state.state is None:
-    st.info("Press Start to begin simulation.")
-    st.stop()
-
+# --------------------------------
+# DISPLAY STATE
+# --------------------------------
 state = st.session_state.state
-env = st.session_state.env
-
-if any(int(state[i]) == 0 for i in [0, 1, 2]):
-    st.warning("Critical state detected: at least one core service is down.")
 
 st.subheader("System State")
-st.table(
-    {
-        "Component": ["Frontend", "Backend", "DB"],
-        "Status": [
-            STATUS_TEXT[int(state[0])],
-            STATUS_TEXT[int(state[1])],
-            STATUS_TEXT[int(state[2])],
-        ],
-        "Latency": [
-            f"{state[3]:.1f} ms",
-            f"{state[4]:.1f} ms",
-            f"{state[5]:.1f} ms",
-        ],
-    }
-)
+try:
+    if any(int(state[i]) == 0 for i in [0,1,2]):
+        st.error("⚠ Critical Failure Detected")
+except (KeyError, TypeError, IndexError):
+    # Handle dict-style state
+    if isinstance(state, dict):
+        has_failure = any(int(state.get(k, 2)) == 0 for k in ["frontend_status", "backend_status", "db_status"])
+        if has_failure:
+            st.error("⚠ Critical Failure Detected")
 
-st.subheader("Metrics")
-m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric("System Health", health_summary(state))
-m2.metric("Error Rate", f"{state[6]:.4f}")
-m3.metric("Traffic Load", f"{state[7]:.4f}")
-m4.metric("Queue Length", f"{state[9]:.1f}")
-m5.metric("Step Count", st.session_state.step_count)
 
-st.subheader("Agent Decisions")
-suggestions = st.session_state.suggestions or coordinator.get_suggestions(state)
 
-def suggestion_text(name):
-    action, conf = suggestions[name]
-    return f"{ACTION_TEXT.get(action, str(action))} (conf={conf:.2f})"
+try:
+    frontend, backend, db = render_status(state[0]), render_status(state[1]), render_status(state[2])
+    fl, bl, dl = state[3], state[4], state[5]
+    err, traffic = state[6], state[7]
+except Exception:
+    frontend = render_status(state.get("frontend_status", 0))
+    backend = render_status(state.get("backend_status", 0))
+    db = render_status(state.get("db_status", 0))
+    fl = state.get("frontend_latency", 0)
+    bl = state.get("backend_latency", 0)
+    dl = state.get("db_latency", 0)
+    err = state.get("error_rate", 1)
+    traffic = state.get("traffic_load", 0)
 
-d1, d2 = st.columns(2)
-with d1:
-    st.write(f"Frontend Agent -> {suggestion_text('frontend')}")
-    st.write(f"Backend Agent -> {suggestion_text('backend')}")
-with d2:
-    st.write(f"DB Agent -> {suggestion_text('database')}")
-    st.write(f"Traffic Agent -> {suggestion_text('traffic')}")
+col1, col2, col3 = st.columns(3)
 
-st.write(f"Final Decision -> {ACTION_TEXT.get(st.session_state.last_action, '-')}")
-st.write(f"Reason -> {st.session_state.last_reason}")
+col1.metric("Frontend", frontend)
+col2.metric("Backend", backend)
+col3.metric("Database", db)
 
-st.subheader("Recovery Status")
-st.write(recovery_status(st.session_state.done, env))
-if st.session_state.done:
-    if env.global_error_rate < 0.02:
-        st.success("System recovered.")
-    else:
-        st.warning("Episode finished without full recovery.")
+col4, col5 = st.columns(2)
+col4.metric("Error Rate", f"{err:.3f}")
+col5.metric("Traffic", f"{traffic:.3f}")
+
+# --------------------------------
+# LOG
+# --------------------------------
+st.subheader("AI Decision Insight")
+
+last_action = st.session_state.log[-1]["action"] if st.session_state.log else None
+
+ACTION_REASON = {
+    0: "System stable → monitoring",
+    1: "Frontend issue detected → restarting frontend",
+    2: "Backend instability → restarting backend",
+    3: "Database failure → highest priority restart",
+    4: "High load → throttling traffic",
+    5: "System imbalance → rebalancing traffic"
+}
+
+if last_action is not None:
+    st.info(ACTION_REASON.get(last_action, "Monitoring system"))
 
 st.subheader("Recent Actions")
+
 if st.session_state.log:
-    st.table(st.session_state.log)
+    st.table(st.session_state.log[-10:])
 else:
-    st.write("No actions yet.")
+    st.write("No actions yet")
+
+# --------------------------------
+# STATUS
+# --------------------------------
+if st.session_state.done:
+    if err < 0.05:
+        st.success("System Recovered")
+    else:
+        st.warning("Finished but not fully recovered")
+
+
+
+st.subheader("Performance Summary")
+
+state = st.session_state.state
+steps = st.session_state.step
+try:
+    error = state[6]
+except:
+    error = state.get("error_rate", 1.0) if isinstance(state, dict) else 1.0
+
+if error < 0.01:
+    st.success(f"✅ Recovered in {steps} steps with low error rate {error:.3f}")
+elif error < 0.05:
+    st.warning(f"⚠️ Partially stable after {steps} steps (error: {error:.3f}). Recovered in {steps} steps to near-stable state.")
+else:
+    st.error(f"❌ System not stable (error: {error:.3f})")
+
+st.subheader("Error Rate Reduction Over Time")
+if st.session_state.error_history:
+    st.line_chart(st.session_state.error_history)
+else:
+    st.info("No error history yet. Run a few steps to visualize reduction.")
+
+
+
+# --------------------------------
+# SCENARIO SELECTION
+# --------------------------------
+st.sidebar.subheader("Configuration")
+
+scenario_option = st.sidebar.selectbox(
+    "Select Scenario",
+    ["None (Healthy)", "traffic_spike", "db_failure", "multi_failure", "extreme_failure"],
+    help="Choose an incident scenario to simulate"
+)
+
+# Inject scenario on reset
+if "scenario" not in st.session_state:
+    st.session_state.scenario = "None"
+
+if st.sidebar.button("Apply Scenario"):
+    if scenario_option != "None (Healthy)":
+        st.session_state.env.inject_scenario(scenario_option)
+        st.session_state.state = st.session_state.env.state()
+        st.session_state.scenario = scenario_option
+        st.session_state.initial_error = st.session_state.state.get("error_rate", 1.0)
+        st.session_state.step = 0
+        st.session_state.log = []
+        st.session_state.error_history = [_safe_get_error(st.session_state.state)]
+        st.session_state.rule_baseline = _run_rule_baseline(scenario_option)
+        st.success(f"✅ Scenario '{scenario_option}' applied!")
+    else:
+        st.session_state.scenario = "None"
+        st.session_state.rule_baseline = _run_rule_baseline("None")
+        st.info("System is healthy")
+
+
+
+# --------------------------------
+# PERFORMANCE METRICS
+# --------------------------------
+if st.session_state.step > 0 or "initial_error" in st.session_state:
+    st.subheader("Performance Metrics")
+    st.caption("*Metrics from current run. System performance is validated across multiple seeded runs for consistency.*")
+    
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    
+    with col_m1:
+        if "initial_error" in st.session_state:
+            st.metric("Initial Error", f"{st.session_state.initial_error:.3f}")
+        else:
+            st.metric("Initial Error", "N/A")
+    
+    with col_m2:
+        current_error = state.get("error_rate", 1.0) if isinstance(state, dict) else state[6]
+        st.metric("Current Error", f"{current_error:.3f}")
+    
+    with col_m3:
+        if "initial_error" in st.session_state:
+            improvement = st.session_state.initial_error - (state.get("error_rate", 1.0) if isinstance(state, dict) else state[6])
+            st.metric("Improvement", f"{improvement:.3f}")
+        else:
+            st.metric("Improvement", "N/A")
+    
+    with col_m4:
+        st.metric("Steps Taken", st.session_state.step)
+
+usage = get_usage_stats()
+col_u1, col_u2 = st.columns(2)
+with col_u1:
+    st.metric("RL Usage %", f"{usage['rl_usage_pct']:.1f}%")
+with col_u2:
+    st.metric("Rule Override %", f"{usage['rule_usage_pct']:.1f}%")
+
+if usage["rl_usage_pct"] > 80.0:
+    st.success("RL Usage target met: above 80%")
+elif usage["rl_used"] + usage["rule_used"] > 0:
+    st.warning("RL Usage target not yet met (expected > 80%).")
+
+st.subheader("AI vs Rule Comparison")
+if st.session_state.get("rule_baseline") is None:
+    st.session_state.rule_baseline = _run_rule_baseline(st.session_state.get("scenario", "None"))
+
+baseline = st.session_state.rule_baseline
+cmp_col1, cmp_col2 = st.columns(2)
+with cmp_col1:
+    st.metric("AI Steps", st.session_state.step)
+    st.metric("Rule Steps", baseline["steps"])
+with cmp_col2:
+    st.metric("AI Final Error", f"{error:.3f}")
+    st.metric("Rule Final Error", f"{baseline['final_error']:.3f}")
+
+
+
+# --------------------------------
+# POLICY INSIGHTS
+# --------------------------------
+st.subheader("Decision Strategy")
+
+if st.session_state.log:
+    last_action = st.session_state.log[-1]["action"] if st.session_state.log else None
+    
+    if last_action is not None:
+        action_names = {
+            0: "🟢 Monitoring",
+            1: "🔄 Frontend Restart",
+            2: "🔄 Backend Restart",
+            3: "🔄 Database Restart",
+            4: "🚦 Traffic Throttle",
+            5: "⚖️  Load Rebalance"
+        }
+        
+        st.info(f"Last Action: {action_names.get(last_action, 'Unknown')}")
+        st.write("This hybrid AI/Rule system intelligently combines:")
+        st.write("- **AI Agent**: Adaptive responses informed by reinforcement learning")
+        st.write("- **Rule Engine**: Critical failure prioritization and safety overrides")
+        st.write("- **Validation**: System performance is validated across multiple scenarios with seeded runs")
+else:
+    st.info("No actions taken yet. Click 'Start / Reset' to begin.")

@@ -25,6 +25,23 @@ rl_used = 0
 rule_used = 0
 
 
+def get_usage_stats():
+    total = rl_used + rule_used
+    if total == 0:
+        return {
+            "rl_used": 0,
+            "rule_used": 0,
+            "rl_usage_pct": 0.0,
+            "rule_usage_pct": 0.0,
+        }
+    return {
+        "rl_used": rl_used,
+        "rule_used": rule_used,
+        "rl_usage_pct": (rl_used / total) * 100.0,
+        "rule_usage_pct": (rule_used / total) * 100.0,
+    }
+
+
 def _set_global_seed(seed=42):
     random.seed(seed)
     if np is not None:
@@ -182,20 +199,3 @@ if __name__ == "__main__":
     print("Rule usage:", rule_used)
 
     print("\n=== INFERENCE COMPLETE ===")
-
-
-def get_usage_stats():
-    total = rl_used + rule_used
-    if total == 0:
-        return {
-            "rl_used": 0,
-            "rule_used": 0,
-            "rl_usage_pct": 0.0,
-            "rule_usage_pct": 0.0,
-        }
-    return {
-        "rl_used": rl_used,
-        "rule_used": rule_used,
-        "rl_usage_pct": (rl_used / total) * 100.0,
-        "rule_usage_pct": (rule_used / total) * 100.0,
-    }

@@ -62,6 +62,30 @@ class SREEnvironment:
             float(self.request_queue),
         ]
 
+    def extreme_scenario(self) -> str:
+        """Inject a severe multi-component failure state for stress testing."""
+        # Requested aliases for scenario readability.
+        self.frontend_status = 1
+        self.backend_status = 0
+        self.db_status = 0
+        self.traffic = 0.95
+
+        self.a_status = self.STATUS_DEGRADED
+        self.b_status = self.STATUS_DOWN
+        self.db_status = self.STATUS_DOWN
+
+        self.a_latency = max(self.a_latency, 900.0)
+        self.b_latency = max(self.b_latency, 1600.0)
+        self.db_latency = max(self.db_latency, 1800.0)
+
+        self.global_error_rate = 0.9
+        self.global_traffic_load = 0.95
+        self.request_queue = 800.0
+        self.traffic_balance = 0.5
+        self.stable_steps = 0
+
+        return "extreme_failure"
+
     def reset(self) -> list:
         """Resets the environment and injects initial failure patterns."""
         self.step_count = 0

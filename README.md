@@ -48,21 +48,41 @@ Instead of relying on static rules, we allow an RL-based controller to adapt to 
 
 ## How to Run
 
-### 1. Install dependencies
-pip install torch streamlit
+### Quick Start (Recommended)
+```bash
+chmod +x quick_start.sh
+./quick_start.sh
+```
+This will:
+1. Create a virtual environment
+2. Install all dependencies
+3. Run validation suite
+4. Launch the interactive demo
 
-### 2. Run evaluation
-python benchmark.py
-python robustness_test.py
+### Manual Setup
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-### 3. Run demo
-streamlit run app.py
+# Run validation
+python3 validate_tasks.py
+
+# Run all tasks
+python3 run_all.py
+
+# Run inference module
+python3 -m src.inference.inference
+
+# Launch interactive demo
+streamlit run frontend/app.py
+```
 
 ## Demo Flow
-1. Start simulation
-2. Observe system state
-3. Run auto steps
-4. Watch system recover automatically
+1. Run `python3 validate_tasks.py` to verify all systems
+2. Run `python3 run_all.py` to see task execution
+3. Run `streamlit run frontend/app.py` for live dashboard
+4. Observe system state and recovery actions
+5. Watch automatic incident recovery in action
 
 ## Why This Matters
 Real-world distributed systems require both:

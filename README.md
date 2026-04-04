@@ -3,8 +3,8 @@ title: resiliAI
 emoji: 🤖
 colorFrom: indigo
 colorTo: purple
-sdk: streamlit
-app_file: frontend/app.py
+sdk: docker
+app_file: api.py
 base_path: /web
 ---
 

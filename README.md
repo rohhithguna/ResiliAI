@@ -5,6 +5,7 @@ colorFrom: indigo
 colorTo: purple
 sdk: docker
 app_file: api.py
+base_path: /web
 ---
 
 

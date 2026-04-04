@@ -78,7 +78,6 @@ def select_action(state):
     balance = float(_safe_get(state, 8, "traffic_balance", 0.0))
     queue = float(_safe_get(state, 9, "request_queue", 0.0))
 
-    # 1) Critical failures: strict rule path
     if db == 0:
         rule_used += 1
         return 3
@@ -89,7 +88,6 @@ def select_action(state):
         rule_used += 1
         return 1
 
-    # 2) High latency recovery control
     if dl > 900:
         rl_used += 1
         return 3
@@ -100,17 +98,14 @@ def select_action(state):
         rl_used += 1
         return 1
 
-    # 3) Traffic / error control
     if err > 0.3 or traffic > 0.85:
         rl_used += 1
         return 4
 
-    # 4) Load balancing and queue pressure
     if abs(balance) > 0.3 or queue > 600:
         rl_used += 1
         return 5
 
-    # 5) Stable system
     rl_used += 1
     return 0
 
@@ -123,7 +118,8 @@ def run_task(task, grader):
     steps = 0
     max_steps = task["max_steps"]
 
-    print(f"\n=== Running: {task['name']} ===")
+    # START
+    print(f"[START] task={task['name']}")
 
     for step in range(max_steps):
         action = select_action(state)
@@ -133,19 +129,20 @@ def run_task(task, grader):
         obs = _state_to_obs(next_state)
         score = grader(obs)
 
-        print(f"Step {step+1} | Action: {action} | Score: {score:.2f}")
+        # STEP
+        print(f"[STEP] step={step+1} action={action} score={round(score,4)}")
 
         state = next_state
         total_reward += reward
         steps += 1
 
-        # Do not terminate immediately on done; only exit early on high-quality recovery.
         if done and score > 0.8:
             break
 
     final_score = grader(_state_to_obs(state))
 
-    print(f"Final Score: {final_score:.2f}")
+    # END
+    print(f"[END] final_score={round(final_score,4)} steps={steps}")
 
     return {
         "task": task["name"],
@@ -155,7 +152,6 @@ def run_task(task, grader):
         "rl_used": rl_used,
         "rule_used": rule_used,
         "total_reward": total_reward,
-        # Keep legacy key for compatibility with existing scripts.
         "final_score": final_score,
     }
 
@@ -169,19 +165,7 @@ def run_all():
 
 
 if __name__ == "__main__":
-    print("=== INFERENCE START ===")
-
-    results = run_all()
-
-    print("\n=== SUMMARY ===")
-    for r in results:
-        print(f"{r['task']} -> score: {r['score']:.2f}, steps: {r['steps']}")
-
-    print("\n===== RL ANALYSIS =====")
-    print("RL usage:", rl_used)
-    print("Rule usage:", rule_used)
-
-    print("\n=== INFERENCE COMPLETE ===")
+    run_all()
 
 
 def get_usage_stats():

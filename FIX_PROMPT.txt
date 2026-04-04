@@ -1,0 +1,32 @@
+Modify inference.py with the following STRICT rules:
+
+1. DO NOT change any logic, loops, variables, imports, or flow.
+2. ONLY change print statements.
+
+3. Replace:
+   print("=== Running:", task_name)
+   WITH:
+   print(f"[START] task={task_name}")
+
+4. Replace:
+   print(f"Step {i} | Action: {action} | Score: {score}")
+   WITH:
+   print(f"[STEP] step={i} action={action} score={score}")
+
+5. Replace:
+   print(f"Final Score: {score}")
+   WITH:
+   print(f"[END] final_score={score} steps={i}")
+
+6. REMOVE:
+   - "=== INFERENCE START ==="
+   - "=== INFERENCE COMPLETE ==="
+   - "=== SUMMARY ==="
+
+7. Output must ONLY contain:
+   [START], [STEP], [END]
+
+8. Ensure script still runs with:
+   python3 inference.py
+
+DO NOT modify anything else.

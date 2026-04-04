@@ -1,4 +1,3 @@
-torch
 streamlit
 fastapi
 uvicorn

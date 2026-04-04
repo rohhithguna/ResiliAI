@@ -4,16 +4,16 @@ from pathlib import Path
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+# Ensure root path works
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.env.sre_openenv import SREOpenEnv
-from src.inference.inference import select_action, run_task
+from src.inference.inference import run_task
 from tasks.easy_task import get_easy_task
 from tasks.medium_task import get_medium_task
 from tasks.hard_task import get_hard_task
-
 
 app = FastAPI()
 
@@ -52,7 +52,7 @@ def reset(data: ResetInput):
 
     return {
         "state": current_state,
-        "task": data.task,
+        "task": data.task
     }
 
 
@@ -67,21 +67,18 @@ def step(data: StepInput):
         "state": next_state,
         "reward": reward,
         "done": done,
-        "info": info,
+        "info": info
     }
 
 
 @app.post("/run")
-def run(task: ResetInput):
-    if task.task == "easy":
+def run(data: ResetInput):
+    if data.task == "easy":
         t = get_easy_task()
-    elif task.task == "medium":
+    elif data.task == "medium":
         t = get_medium_task()
     else:
         t = get_hard_task()
 
-    # Keep model behavior unchanged while exposing API endpoint.
-    _ = select_action
     result = run_task(t)
-
     return result

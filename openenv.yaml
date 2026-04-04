@@ -1,0 +1,12 @@
+name: resiliAI
+env: src.env.sre_openenv:SREOpenEnv
+
+tasks:
+  - tasks.easy_task:get_easy_task
+  - tasks.medium_task:get_medium_task
+  - tasks.hard_task:get_hard_task
+
+graders:
+  - graders.easy_grader:grade_easy
+  - graders.medium_grader:grade_medium
+  - graders.hard_grader:grade_hard

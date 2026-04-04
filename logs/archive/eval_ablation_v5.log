@@ -1,0 +1,34 @@
+/Users/rohhithg/Desktop/meta_project/.venv/lib/python3.14/site-packages/torch/_subclasses/functional_tensor.py:307: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+Run 1 seed=101
+Rule   -> success=64.00% reward=-11.9000 steps=22.47
+RL     -> success=27.00% reward=-5.2100 steps=9.24
+Hybrid -> success=68.00% reward=-31.7500 steps=22.00
+Hybrid RL usage=52.41% | Rule override=47.59%
+
+Run 2 seed=202
+Rule   -> success=71.00% reward=-6.6600 steps=22.31
+RL     -> success=19.00% reward=-9.3300 steps=7.99
+Hybrid -> success=65.00% reward=-40.2200 steps=23.34
+Hybrid RL usage=48.97% | Rule override=51.03%
+
+Run 3 seed=303
+Rule   -> success=61.00% reward=-8.4400 steps=25.09
+RL     -> success=32.00% reward=-3.5400 steps=9.88
+Hybrid -> success=64.00% reward=-36.9100 steps=23.61
+Hybrid RL usage=53.37% | Rule override=46.63%
+
+========== ABLATION (3 runs x 100 episodes) ==========
+RULE: Success 65.33% ± 4.19, Reward -9.0000 ± 2.1756, Steps 23.29 ± 1.27
+RL: Success 26.00% ± 5.35, Reward -6.0267 ± 2.4333, Steps 9.04 ± 0.78
+HYBRID: Success 65.67% ± 1.70, Reward -36.2933 ± 3.4852, Steps 22.98 ± 0.70
+
+========== HYBRID POLICY USAGE ==========
+RL usage: 51.58% ± 1.89
+Rule override: 48.42% ± 1.89
+
+| Method | Success | Reward | Steps |
+|--------|--------:|-------:|------:|
+| Rule | 65.33% ± 4.19 | -9.0000 ± 2.1756 | 23.29 ± 1.27 |
+| RL | 26.00% ± 5.35 | -6.0267 ± 2.4333 | 9.04 ± 0.78 |
+| Hybrid | 65.67% ± 1.70 | -36.2933 ± 3.4852 | 22.98 ± 0.70 |

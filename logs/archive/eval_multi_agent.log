@@ -1,0 +1,324 @@
+Seed: 54907
+
+Episode 1:
+RL   -> reward=-8.0000, steps=27, success=True
+Rule -> reward=30.0000, steps=22, success=True
+Seed: 280679
+
+Episode 2:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 91421
+
+Episode 3:
+RL   -> reward=6.0000, steps=19, success=True
+Rule -> reward=-26.0000, steps=40, success=False
+Seed: 806309
+
+Episode 4:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 427023
+
+Episode 5:
+RL   -> reward=-98.0000, steps=40, success=False
+Rule -> reward=14.0000, steps=26, success=True
+RL failed in this episode
+Seed: 279501
+
+Episode 6:
+RL   -> reward=-98.0000, steps=40, success=False
+Rule -> reward=14.0000, steps=26, success=True
+RL failed in this episode
+Seed: 112931
+
+Episode 7:
+RL   -> reward=-2.0000, steps=30, success=True
+Rule -> reward=32.0000, steps=23, success=True
+Seed: 879234
+
+Episode 8:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 944975
+
+Episode 9:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 917321
+
+Episode 10:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 40007
+
+Episode 11:
+RL   -> reward=8.0000, steps=20, success=True
+Rule -> reward=30.0000, steps=22, success=True
+Seed: 397540
+
+Episode 12:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 562248
+
+Episode 13:
+RL   -> reward=-61.0000, steps=40, success=False
+Rule -> reward=50.0000, steps=32, success=True
+RL failed in this episode
+Seed: 589633
+
+Episode 14:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-8.0000, steps=40, success=False
+Seed: 348334
+
+Episode 15:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 357352
+
+Episode 16:
+RL   -> reward=-92.0000, steps=40, success=False
+Rule -> reward=30.0000, steps=22, success=True
+RL failed in this episode
+Seed: 893477
+
+Episode 17:
+RL   -> reward=-81.0000, steps=40, success=False
+Rule -> reward=38.0000, steps=26, success=True
+RL failed in this episode
+Seed: 54422
+
+Episode 18:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-170.0000, steps=40, success=False
+Seed: 167418
+
+Episode 19:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=8.0000, steps=40, success=False
+Seed: 141618
+
+Episode 20:
+RL   -> reward=-70.0000, steps=40, success=False
+Rule -> reward=40.0000, steps=27, success=True
+RL failed in this episode
+Seed: 353597
+
+Episode 21:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=40, success=False
+Seed: 588211
+
+Episode 22:
+RL   -> reward=8.0000, steps=20, success=True
+Rule -> reward=30.0000, steps=22, success=True
+Seed: 350010
+
+Episode 23:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=40, success=False
+Seed: 735775
+
+Episode 24:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-44.0000, steps=40, success=False
+Seed: 257072
+
+Episode 25:
+RL   -> reward=-74.0000, steps=40, success=False
+Rule -> reward=-4.0000, steps=36, success=True
+RL failed in this episode
+Seed: 171732
+
+Episode 26:
+RL   -> reward=6.0000, steps=22, success=True
+Rule -> reward=-162.0000, steps=40, success=False
+Seed: 1751
+
+Episode 27:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 949910
+
+Episode 28:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-20.0000, steps=40, success=False
+Seed: 457468
+
+Episode 29:
+RL   -> reward=-68.0000, steps=40, success=False
+Rule -> reward=-108.0000, steps=25, success=False
+RL failed in this episode
+Seed: 811165
+
+Episode 30:
+RL   -> reward=-30.0000, steps=37, success=True
+Rule -> reward=36.0000, steps=28, success=True
+Seed: 91869
+
+Episode 31:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 921310
+
+Episode 32:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-142.0000, steps=40, success=False
+Seed: 626628
+
+Episode 33:
+RL   -> reward=-66.0000, steps=40, success=False
+Rule -> reward=34.0000, steps=24, success=True
+RL failed in this episode
+Seed: 395936
+
+Episode 34:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 73271
+
+Episode 35:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-44.0000, steps=40, success=False
+Seed: 6915
+
+Episode 36:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-38.0000, steps=40, success=False
+Seed: 330782
+
+Episode 37:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-68.0000, steps=40, success=False
+Seed: 767598
+
+Episode 38:
+RL   -> reward=-82.0000, steps=40, success=False
+Rule -> reward=-22.0000, steps=40, success=False
+RL failed in this episode
+Seed: 470099
+
+Episode 39:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 106993
+
+Episode 40:
+RL   -> reward=-74.0000, steps=40, success=False
+Rule -> reward=44.0000, steps=32, success=True
+RL failed in this episode
+Seed: 949379
+
+Episode 41:
+RL   -> reward=-74.0000, steps=40, success=False
+Rule -> reward=28.0000, steps=21, success=True
+RL failed in this episode
+Seed: 46019
+
+Episode 42:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 97270
+
+Episode 43:
+RL   -> reward=-34.0000, steps=38, success=True
+Rule -> reward=-148.0000, steps=40, success=False
+Seed: 699545
+
+Episode 44:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-62.0000, steps=40, success=False
+Seed: 149081
+
+Episode 45:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=-38.0000, steps=40, success=False
+Seed: 132382
+
+Episode 46:
+RL   -> reward=-81.0000, steps=40, success=False
+Rule -> reward=-116.0000, steps=26, success=False
+RL failed in this episode
+Seed: 828450
+
+Episode 47:
+RL   -> reward=-86.0000, steps=40, success=False
+Rule -> reward=48.0000, steps=31, success=True
+RL failed in this episode
+Seed: 950647
+
+Episode 48:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 22267
+
+Episode 49:
+RL   -> reward=12.0000, steps=1, success=True
+Rule -> reward=12.0000, steps=1, success=True
+Seed: 305976
+
+Episode 50:
+RL   -> reward=-70.0000, steps=40, success=False
+Rule -> reward=-100.0000, steps=24, success=False
+RL failed in this episode
+========== RL AGENT ==========
+Success rate: 70.00%
+Average reward: -17.9400
+Average steps: 16.80
+
+========== RULE AGENT ==========
+Success rate: 60.00%
+Average reward: -12.4400
+Average steps: 23.78
+
+========== RESULT ==========
+RL agent performs better (higher success rate)
+
+========== IMPROVEMENT ==========
+Reward improvement: -5.5000
+Step reduction: 6.98
+RL agent recovers faster
+
+Sample Episode (RL Agent)
+step=1, action=4, reward=-4.0000, state=[2.0, 2.0, 2.0, 466.6995456007591, 537.140087033845, 278.8685024098163, 0.19643278499497982, 0.8494557899304787, 0.43336976881041084, 165.84195590741876]
+step=2, action=0, reward=-4.0000, state=[2.0, 2.0, 2.0, 616.6995456007592, 717.140087033845, 398.8685024098163, 0.28643278499497987, 0.8494557899304787, 0.4117541399142267, 196.29879136950143]
+step=3, action=2, reward=2.0000, state=[2.0, 2.0, 2.0, 766.6995456007592, 400.0, 518.8685024098163, 0.27700476758821085, 0.8494557899304787, 0.39663575669746004, 237.3912882536492]
+step=4, action=1, reward=2.0000, state=[2.0, 2.0, 2.0, 330.3158086525065, 580.4210782033421, 639.0790415114873, 0.24985434365956288, 0.8494557899304787, 0.3708816543431816, 303.684434279243]
+step=5, action=5, reward=-4.0000, state=[2.0, 2.0, 2.0, 480.3158086525065, 651.5758778984011, 759.0790415114873, 0.31808530359857473, 0.8494557899304787, 0.41639928709389434, 259.15711438932874]
+step=6, action=3, reward=2.0000, state=[2.0, 2.0, 2.0, 631.9038539139045, 833.6932715802651, 301.058696840932, 0.2932223224531161, 0.8494557899304787, 0.42605679512032624, 318.52719471630945]
+step=7, action=2, reward=2.0000, state=[2.0, 2.0, 2.0, 789.0838239821026, 409.57329342426397, 425.84534355306397, 0.26479165017798184, 0.8494557899304787, 0.4070215539807701, 383.7663174623098]
+step=8, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 343.2855391817927, 607.2873456666542, 554.7023696742591, 0.24094620889063695, 0.8494557899304787, 0.3809066276568857, 454.997957120915]
+step=9, action=5, reward=-4.0000, state=[2.0, 2.0, 2.0, 498.80397879966637, 703.8142714244694, 678.3813294195082, 0.3160910739148246, 0.8494557899304787, 0.4423009646841603, 364.381795541859]
+step=10, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 659.0125666877519, 897.4257219419169, 306.8057252587237, 0.31253996076377427, 0.8494557899304787, 0.4368167532521141, 419.10019202766546]
+step=11, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 822.6428150582817, 418.1736644940397, 435.8925575057436, 0.27523296539770875, 0.8494557899304787, 0.45248705925040567, 459.01956432284754]
+step=12, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 349.4883139316855, 624.1580830696205, 568.8847667935339, 0.2483973907450637, 0.8494557899304787, 0.4717452622929813, 527.3636625363313]
+step=13, action=5, reward=-4.0000, state=[2.0, 2.0, 2.0, 506.7077639702957, 737.9274245090376, 693.6977334859407, 0.32755774237915053, 0.8494557899304787, 0.49143369782793367, 384.2269171171185]
+step=14, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 669.9517032461814, 935.5860102102185, 308.8292928505905, 0.32276455924749387, 0.8494557899304787, 0.5109169655627703, 454.51262488533393]
+step=15, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 839.0751990516436, 425.49799440728293, 441.57829005423196, 0.28112145468872746, 0.8494557899304787, 0.538109766237019, 523.1074510637256]
+step=16, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 351.0328098471161, 633.5417408701044, 575.6001632856427, 0.2519261007866684, 0.8494557899304787, 0.5184908029613213, 545.3827815496875]
+step=17, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 517.6538197950755, 767.6422912264501, 706.6808365842822, 0.3382865475072573, 0.8494557899304787, 0.4883972478625171, 493.9117827261926]
+step=18, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 692.7911316889953, 981.1587070850098, 316.7582079292799, 0.33803276732675275, 0.8494557899304787, 0.506863259727544, 593.2686387623975]
+step=19, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 870.292532277735, 436.6685341183195, 455.0924749884396, 0.29230186626299454, 0.8494557899304787, 0.5299362308091506, 620.8496735352956]
+step=20, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 360.8903734228624, 657.855698682136, 595.6860572703479, 0.262777583861165, 0.8494557899304787, 0.5414801212158418, 660.3876899333949]
+step=21, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 532.2796673636954, 760.8664642569317, 729.9455865642365, 0.3445095016230685, 0.8494557899304787, 0.5344724818075482, 549.5417626430506]
+step=22, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 711.2760938501722, 979.5283662389008, 319.33095099098455, 0.34191824020210726, 0.8494557899304787, 0.5449212090238809, 638.2916423422294]
+step=23, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 892.2813343245737, 441.34032063253534, 460.00111130725224, 0.298615711238968, 0.8494557899304787, 0.5436974696239121, 661.7278055346842]
+step=24, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 367.69925252988094, 671.6059906723767, 605.1339463271729, 0.2687789958919819, 0.8494557899304787, 0.5638359651984945, 739.8246128486112]
+step=25, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 539.1242707561327, 795.7747230870451, 739.4172918113408, 0.3547544151169995, 0.8494557899304787, 0.5479311422628499, 549.9585459729368]
+step=26, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 714.8398793330379, 1010.0622011895854, 317.14373905127013, 0.34830032190087445, 0.8494557899304787, 0.5361813184776104, 600.0154333972268]
+step=27, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 896.8424306216897, 442.6700683848692, 458.4787732437047, 0.29948941243614846, 0.8494557899304787, 0.544398338430328, 673.3630983676052]
+step=28, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 366.9237957776298, 671.9017960883755, 603.0946370954579, 0.26827520377838837, 0.8494557899304787, 0.5531730668572457, 730.7776174056805]
+step=29, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 545.2296515797013, 782.0505773686766, 741.9652076301722, 0.3537402453018058, 0.8494557899304787, 0.5282223887280462, 630.2349843575018]
+step=30, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 729.3298991627054, 1007.5175741460152, 322.7334983886693, 0.35180735232557375, 0.8494557899304787, 0.5079341493136741, 697.8362218017136]
+step=31, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 916.7877981042615, 449.94386525540807, 467.7054310163734, 0.30677857686130433, 0.8494557899304787, 0.5280699539828141, 737.0088209848208]
+step=32, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 371.91834537058503, 685.8349924161882, 615.6509945967634, 0.2745720244628031, 0.8494557899304787, 0.5451884655024948, 789.0473626568255]
+step=33, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 540.6178469313594, 804.5430895596486, 748.117328970613, 0.35854681107842, 0.8494557899304787, 0.5274183414627189, 518.1608515423671]
+step=34, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 717.1118532743365, 1019.8684313502846, 317.662670895318, 0.3508197490900836, 0.8494557899304787, 0.5329445319107131, 609.0967406680652]
+step=35, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 896.1891506565133, 438.7697298429025, 457.04753581676925, 0.2982924412493328, 0.8494557899304787, 0.513974486102155, 639.2351361253969]
+step=36, action=1, reward=0.0000, state=[2.0, 2.0, 2.0, 361.0837286848244, 660.2147014226684, 597.7700216066522, 0.2637048483289247, 0.8494557899304787, 0.5234524862983727, 662.6435013229515]
+step=37, action=5, reward=-6.0000, state=[2.0, 2.0, 2.0, 532.8339654247852, 782.595647095059, 732.2701794332928, 0.3494311163767232, 0.8494557899304787, 0.5377351368231951, 553.7527619662095]
+step=38, action=3, reward=0.0000, state=[2.0, 2.0, 2.0, 712.5286856110301, 1002.1886073433856, 319.7964801241633, 0.3467939126018116, 0.8494557899304787, 0.5345631916062232, 646.4384021728571]
+step=39, action=2, reward=0.0000, state=[2.0, 2.0, 2.0, 896.8016869789334, 445.69733515720435, 462.6451477027655, 0.30091999195387636, 0.8494557899304787, 0.542191954400753, 699.8516826255382]
+step=40, action=1, reward=-10.0000, state=[2.0, 2.0, 2.0, 366.35531765761715, 674.1710920340273, 606.8820261411769, 0.26937284515266, 0.8494557899304787, 0.5127399790715539, 724.1453726722]

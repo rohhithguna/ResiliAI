@@ -1,0 +1,19 @@
+[project]
+name = "resiliAI"
+version = "0.1.0"
+description = "AI autonomous incident recovery system"
+authors = [
+    { name = "Rohhith" }
+]
+requires-python = ">=3.9"
+
+dependencies = [
+    "numpy",
+    "streamlit",
+    "pandas",
+    "matplotlib"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

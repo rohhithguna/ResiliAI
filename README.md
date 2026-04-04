@@ -1,3 +1,13 @@
+---
+title: resiliAI
+emoji: 🤖
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_file: api.py
+---
+
+
 # ResiliAI - Autonomous Incident Recovery System
 
 ## Overview

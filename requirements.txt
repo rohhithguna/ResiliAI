@@ -1,2 +1,6 @@
 torch
 streamlit
+fastapi
+uvicorn
+numpy
+pydantic

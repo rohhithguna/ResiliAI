@@ -17,6 +17,11 @@ from tasks.hard_task import get_hard_task
 
 app = FastAPI()
 
+# ✅ ROOT ENDPOINT (FIX ADDED HERE)
+@app.get("/")
+def root():
+    return {"message": "resiliAI API is running"}
+
 env = SREOpenEnv(seed=42)
 current_state = None
 

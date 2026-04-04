@@ -1,5 +1,5 @@
-streamlit
 fastapi
 uvicorn
 numpy
 pydantic
+openenv-core>=0.2.0

@@ -17,7 +17,7 @@ from tasks.hard_task import get_hard_task
 
 app = FastAPI()
 
-# ✅ ROOT ENDPOINT (FIX ADDED HERE)
+# ✅ ROOT ENDPOINT
 @app.get("/")
 def root():
     return {"message": "resiliAI API is running"}
@@ -39,15 +39,21 @@ def health():
     return {"status": "ok"}
 
 
+# ✅ FIXED: reset must work WITHOUT body
 @app.post("/reset")
-def reset(data: ResetInput):
+def reset(data: ResetInput = None):
     global current_state, env
 
     env = SREOpenEnv(seed=42)
 
-    if data.task == "easy":
+    # default task
+    task_name = "easy"
+    if data and data.task:
+        task_name = data.task
+
+    if task_name == "easy":
         task = get_easy_task()
-    elif data.task == "medium":
+    elif task_name == "medium":
         task = get_medium_task()
     else:
         task = get_hard_task()
@@ -57,7 +63,7 @@ def reset(data: ResetInput):
 
     return {
         "state": current_state,
-        "task": data.task
+        "task": task_name
     }
 
 
@@ -76,11 +82,17 @@ def step(data: StepInput):
     }
 
 
+# ✅ FIXED: run must also allow no body
 @app.post("/run")
-def run(data: ResetInput):
-    if data.task == "easy":
+def run(data: ResetInput = None):
+
+    task_name = "easy"
+    if data and data.task:
+        task_name = data.task
+
+    if task_name == "easy":
         t = get_easy_task()
-    elif data.task == "medium":
+    elif task_name == "medium":
         t = get_medium_task()
     else:
         t = get_hard_task()

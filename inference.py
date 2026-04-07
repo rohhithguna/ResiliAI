@@ -25,72 +25,9 @@ rl_used = 0
 rule_used = 0
 _llm_ping_sent = False
 
-
-def _find_env_value(candidates, required_tokens):
-    import os
-
-    for name in candidates:
-        value = os.environ.get(name)
-        if value:
-            return value
-
-    for name, value in os.environ.items():
-        upper_name = name.upper()
-        if not value:
-            continue
-        if all(token in upper_name for token in required_tokens):
-            return value
-    return None
-
-
-def _resolve_proxy_env():
-    base = _find_env_value(
-        [
-            "API_BASE_URL",
-            "OPENAI_API_BASE",
-            "OPENAI_BASE_URL",
-            "LITELLM_BASE_URL",
-            "LITELLM_PROXY_URL",
-            "LITELLM_URL",
-            "LLM_PROXY_URL",
-            "PROXY_BASE_URL",
-            "LITELLM_PROXY_BASE_URL",
-        ],
-        required_tokens=["URL"],
-    )
-    if not base:
-        base = _find_env_value([], required_tokens=["BASE", "URL"]) or _find_env_value([], required_tokens=["PROXY", "URL"])
-
-    key = _find_env_value(
-        [
-            "API_KEY",
-            "OPENAI_API_KEY",
-            "LITELLM_API_KEY",
-            "LITELLM_PROXY_API_KEY",
-            "LITELLM_KEY",
-            "LLM_PROXY_API_KEY",
-            "PROXY_API_KEY",
-            "LITELLM_PROXY_KEY",
-        ],
-        required_tokens=["API", "KEY"],
-    )
-    if not key:
-        key = _find_env_value([], required_tokens=["PROXY", "KEY"]) or _find_env_value([], required_tokens=["OPENAI", "KEY"]) or _find_env_value([], required_tokens=["LITELLM", "KEY"])
-
-    return base, key
-
-
 def call_llm(prompt):
     import os
     from openai import OpenAI
-
-    base, key = _resolve_proxy_env()
-    if base and not os.environ.get("API_BASE_URL"):
-        os.environ["API_BASE_URL"] = base
-    if key and not os.environ.get("API_KEY"):
-        os.environ["API_KEY"] = key
-    if not base or not key:
-        return {"error": "env_missing"}
 
     client = OpenAI(
         base_url=os.environ["API_BASE_URL"],
@@ -100,10 +37,10 @@ def call_llm(prompt):
         return client.chat.completions.create(
             model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=5,
+            max_tokens=5
         )
-    except Exception as e:
-        return {"error": str(e)}
+    except Exception:
+        return None
 
 
 def _ensure_llm_ping():
@@ -119,9 +56,6 @@ def _set_global_seed(seed=42):
         np.random.seed(seed)
     if torch is not None:
         torch.manual_seed(seed)
-
-
-_set_global_seed(42)
 
 
 def _safe_get(state, idx, key, default):
@@ -145,11 +79,6 @@ def _state_to_obs(state):
         "traffic_balance": float(_safe_get(state, 8, "traffic_balance", 0.0)),
         "request_queue": float(_safe_get(state, 9, "request_queue", 0.0)),
     }
-
-
-from src.agents.multi_agent import CoordinatorAgent
-
-coordinator = CoordinatorAgent()
 
 
 def select_action(state):
@@ -201,6 +130,7 @@ def select_action(state):
 
 def run_task(task, grader):
     call_llm("ping")
+    _set_global_seed(42)
     env = SREOpenEnv(seed=42)
     state = env.reset()
 

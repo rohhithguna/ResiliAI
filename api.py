@@ -106,5 +106,4 @@ def run(data: ResetInput = None):
     else:
         t = get_hard_task()
 
-    result = run_task(t)
-    return result
+    return run_task(t)

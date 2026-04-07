@@ -107,16 +107,21 @@ def _score_from_obs(obs):
 
 
 def call_llm(prompt="ping"):
-    try:
-        from openai import OpenAI
-        import os
+    from openai import OpenAI
+    import os
 
-        client = OpenAI(
-            base_url=os.environ["API_BASE_URL"],
-            api_key=os.environ["API_KEY"]
-        )
-        model = os.environ.get("MODEL_NAME", "gpt-3.5-turbo")
-        messages = [{"role": "user", "content": prompt}]
+    base_url = os.environ.get("API_BASE_URL")
+    api_key = os.environ.get("API_KEY")
+    if not base_url or not api_key:
+        return
+
+    client = OpenAI(
+        base_url=base_url,
+        api_key=api_key
+    )
+    model = os.environ.get("MODEL_NAME", "gpt-3.5-turbo")
+    messages = [{"role": "user", "content": prompt}]
+    try:
         client.chat.completions.create(
             model=model,
             messages=messages,

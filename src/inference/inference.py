@@ -26,6 +26,60 @@ rule_used = 0
 _llm_ping_sent = False
 
 
+def _find_env_value(candidates, required_tokens):
+    import os
+
+    for name in candidates:
+        value = os.environ.get(name)
+        if value:
+            return value
+
+    for name, value in os.environ.items():
+        upper_name = name.upper()
+        if not value:
+            continue
+        if all(token in upper_name for token in required_tokens):
+            return value
+    return None
+
+
+def _resolve_proxy_env():
+    base = _find_env_value(
+        [
+            "API_BASE_URL",
+            "OPENAI_API_BASE",
+            "OPENAI_BASE_URL",
+            "LITELLM_BASE_URL",
+            "LITELLM_PROXY_URL",
+            "LITELLM_URL",
+            "LLM_PROXY_URL",
+            "PROXY_BASE_URL",
+            "LITELLM_PROXY_BASE_URL",
+        ],
+        required_tokens=["URL"],
+    )
+    if not base:
+        base = _find_env_value([], required_tokens=["BASE", "URL"]) or _find_env_value([], required_tokens=["PROXY", "URL"])
+
+    key = _find_env_value(
+        [
+            "API_KEY",
+            "OPENAI_API_KEY",
+            "LITELLM_API_KEY",
+            "LITELLM_PROXY_API_KEY",
+            "LITELLM_KEY",
+            "LLM_PROXY_API_KEY",
+            "PROXY_API_KEY",
+            "LITELLM_PROXY_KEY",
+        ],
+        required_tokens=["API", "KEY"],
+    )
+    if not key:
+        key = _find_env_value([], required_tokens=["PROXY", "KEY"]) or _find_env_value([], required_tokens=["OPENAI", "KEY"]) or _find_env_value([], required_tokens=["LITELLM", "KEY"])
+
+    return base, key
+
+
 def get_usage_stats():
     total = rl_used + rule_used
     if total == 0:
@@ -107,26 +161,7 @@ def call_llm(prompt):
     from openai import OpenAI
     import os
 
-    base = (
-        os.environ.get("API_BASE_URL")
-        or os.environ.get("OPENAI_API_BASE")
-        or os.environ.get("OPENAI_BASE_URL")
-        or os.environ.get("LITELLM_BASE_URL")
-        or os.environ.get("LITELLM_PROXY_URL")
-        or os.environ.get("LITELLM_URL")
-        or os.environ.get("LLM_PROXY_URL")
-        or os.environ.get("PROXY_BASE_URL")
-        or os.environ.get("BASE_URL")
-    )
-    key = (
-        os.environ.get("API_KEY")
-        or os.environ.get("OPENAI_API_KEY")
-        or os.environ.get("LITELLM_API_KEY")
-        or os.environ.get("LITELLM_PROXY_API_KEY")
-        or os.environ.get("LITELLM_KEY")
-        or os.environ.get("LLM_PROXY_API_KEY")
-        or os.environ.get("PROXY_API_KEY")
-    )
+    base, key = _resolve_proxy_env()
     if base and not os.environ.get("API_BASE_URL"):
         os.environ["API_BASE_URL"] = base
     if key and not os.environ.get("API_KEY"):

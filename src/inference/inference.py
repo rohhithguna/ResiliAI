@@ -107,8 +107,12 @@ def call_llm(prompt):
     from openai import OpenAI
     import os
 
-    base = os.environ.get("API_BASE_URL")
-    key = os.environ.get("API_KEY")
+    base = os.environ.get("API_BASE_URL") or os.environ.get("OPENAI_API_BASE") or os.environ.get("OPENAI_BASE_URL") or os.environ.get("LITELLM_BASE_URL")
+    key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY") or os.environ.get("LITELLM_API_KEY")
+    if base and not os.environ.get("API_BASE_URL"):
+        os.environ["API_BASE_URL"] = base
+    if key and not os.environ.get("API_KEY"):
+        os.environ["API_KEY"] = key
 
     if not base or not key:
         return {"error": "env_missing"}

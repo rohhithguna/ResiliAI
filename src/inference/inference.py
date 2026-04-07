@@ -230,6 +230,7 @@ def run_task(task):
         and final_error < 0.15
     )
     final_score = _score_from_obs(final_obs)
+    final_score = max(1e-6, min(final_score, 0.999999))
 
     return {
         "task": task.get("name", "unknown_task") if isinstance(task, dict) else "unknown_task",

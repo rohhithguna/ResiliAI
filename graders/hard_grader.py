@@ -58,4 +58,5 @@ def grade_hard(result):
         + 0.10 * queue_score
         + 0.05 * _clamp01(v["base_score"])
     )
+    score = max(1e-6, min(score, 0.999999))
     return float(_clamp01(score))

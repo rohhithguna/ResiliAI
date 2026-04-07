@@ -160,6 +160,7 @@ def run_task(task, grader):
             break
 
     final_score = grader(_state_to_obs(state))
+    final_score = max(1e-6, min(final_score, 0.999999))
 
     # END
     print(f"[END] final_score={round(final_score,4)} steps={steps}")

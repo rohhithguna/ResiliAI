@@ -107,14 +107,9 @@ def call_llm(prompt):
     import os
     from openai import OpenAI
 
-    base_url = os.environ.get("API_BASE_URL") or os.environ.get("OPENAI_API_BASE") or os.environ.get("OPENAI_BASE_URL")
-    api_key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if not base_url or not api_key:
-        return None
-
     client = OpenAI(
-        base_url=base_url,
-        api_key=api_key
+        base_url=os.environ["API_BASE_URL"],
+        api_key=os.environ["API_KEY"]
     )
     try:
         return client.chat.completions.create(

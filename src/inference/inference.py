@@ -106,18 +106,21 @@ def _score_from_obs(obs):
     return max(0.0, min(1.0, 0.55 * error_score + 0.45 * status_score))
 
 
-def call_llm():
+def call_llm(prompt="ping"):
     try:
         from openai import OpenAI
+        import os
 
         client = OpenAI(
             base_url=os.environ["API_BASE_URL"],
-            api_key=os.environ["API_KEY"],
+            api_key=os.environ["API_KEY"]
         )
+        model = os.environ.get("MODEL_NAME", "gpt-3.5-turbo")
+        messages = [{"role": "user", "content": prompt}]
         client.chat.completions.create(
-            model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
-            messages=[{"role": "user", "content": "system check"}],
-            max_tokens=10,
+            model=model,
+            messages=messages,
+            max_tokens=5,
         )
     except Exception:
         pass
@@ -180,8 +183,8 @@ def select_action(state):
 
 
 def run_task(task):
+    call_llm("ping")
     global rl_used, rule_used
-    call_llm()
     _set_global_seed(42)
     rl_used = 0
     rule_used = 0

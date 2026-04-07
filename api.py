@@ -10,7 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.env.sre_openenv import SREOpenEnv
-from src.inference.inference import run_task
+from src.inference.inference import call_llm, run_task
 from tasks.easy_task import get_easy_task
 from tasks.medium_task import get_medium_task
 from tasks.hard_task import get_hard_task
@@ -85,6 +85,8 @@ def step(data: StepInput):
 # ✅ FIXED: run must also allow no body
 @app.post("/run")
 def run(data: ResetInput = None):
+
+    call_llm()
 
     task_name = "easy"
     if data and data.task:

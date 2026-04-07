@@ -1,0 +1,1 @@
+{"task":"easy_traffic_spike_recovery","score":0.8241138226450884,"final_score":0.8241138226450884,"steps":24,"final_error":0.11524759519074847,"initial_error":0.84,"recovered":true,"max_steps":24,"traffic_load":0.4999999999999999,"request_queue":271.9554316786372,"load_balancer_status":2,"total_reward":-333.1097147533449,"rl_used":24,"rule_used":0}

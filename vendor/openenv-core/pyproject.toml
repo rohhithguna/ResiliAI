@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-core"
+version = "0.2.0"
+description = "Lightweight local stub to satisfy deployment dependency checks"
+requires-python = ">=3.8"

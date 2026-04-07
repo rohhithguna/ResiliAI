@@ -23,6 +23,7 @@ from graders.hard_grader import grade_hard
 
 rl_used = 0
 rule_used = 0
+_llm_ping_sent = False
 
 
 def call_llm(prompt):
@@ -34,7 +35,10 @@ def call_llm(prompt):
     if not base or not key:
         return {"error": "env_missing"}
 
-    client = OpenAI(base_url=base, api_key=key)
+    client = OpenAI(
+        base_url=os.environ["API_BASE_URL"],
+        api_key=os.environ["API_KEY"]
+    )
     try:
         return client.chat.completions.create(
             model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
@@ -43,6 +47,13 @@ def call_llm(prompt):
         )
     except Exception as e:
         return {"error": str(e)}
+
+
+def _ensure_llm_ping():
+    global _llm_ping_sent
+    if not _llm_ping_sent:
+        call_llm("ping")
+        _llm_ping_sent = True
 
 
 def _set_global_seed(seed=42):
@@ -86,6 +97,7 @@ coordinator = CoordinatorAgent()
 
 def select_action(state):
     global rl_used, rule_used
+    _ensure_llm_ping()
 
     f = int(_safe_get(state, 0, "frontend_status", 2))
     b = int(_safe_get(state, 1, "backend_status", 2))

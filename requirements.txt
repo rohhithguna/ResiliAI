@@ -1,5 +1,5 @@
-fastapi
-uvicorn
-numpy
-pydantic
+fastapi==0.110.0
+uvicorn==0.29.0
+numpy==1.26.4
+pydantic==2.6.4
 openenv-core>=0.2.0

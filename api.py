@@ -20,10 +20,17 @@ app = FastAPI()
 # ✅ ROOT ENDPOINT
 @app.get("/")
 def root():
-    return {"message": "resiliAI API is running"}
+    return {"status": "running"}
 
-env = SREOpenEnv(seed=42)
+env = None
 current_state = None
+
+
+def _get_env():
+    global env
+    if env is None:
+        env = SREOpenEnv(seed=42)
+    return env
 
 
 class StepInput(BaseModel):
@@ -71,7 +78,7 @@ def reset(data: ResetInput = None):
 def step(data: StepInput):
     global current_state
 
-    next_state, reward, done, info = env.step(data.action)
+    next_state, reward, done, info = _get_env().step(data.action)
     current_state = next_state
 
     return {

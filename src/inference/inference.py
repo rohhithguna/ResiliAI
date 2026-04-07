@@ -106,12 +106,15 @@ def call_llm(prompt):
     from openai import OpenAI
     import os
 
-    if "API_BASE_URL" not in os.environ or "API_KEY" not in os.environ:
-        return None
+    base = os.environ.get("API_BASE_URL")
+    key = os.environ.get("API_KEY")
+
+    if not base or not key:
+        return {"error": "env_missing"}
 
     client = OpenAI(
-        base_url=os.environ["API_BASE_URL"],
-        api_key=os.environ["API_KEY"]
+        base_url=base,
+        api_key=key
     )
     try:
         return client.chat.completions.create(
@@ -119,8 +122,8 @@ def call_llm(prompt):
             messages=[{"role": "user", "content": prompt}],
             max_tokens=5
         )
-    except Exception:
-        return None
+    except Exception as e:
+        return {"error": str(e)}
 
 
 def select_action(state):

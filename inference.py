@@ -25,6 +25,26 @@ rl_used = 0
 rule_used = 0
 
 
+def call_llm(prompt):
+    import os
+    from openai import OpenAI
+
+    base = os.environ.get("API_BASE_URL")
+    key = os.environ.get("API_KEY")
+    if not base or not key:
+        return {"error": "env_missing"}
+
+    client = OpenAI(base_url=base, api_key=key)
+    try:
+        return client.chat.completions.create(
+            model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=5,
+        )
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def _set_global_seed(seed=42):
     random.seed(seed)
     if np is not None:
@@ -111,6 +131,7 @@ def select_action(state):
 
 
 def run_task(task, grader):
+    call_llm("ping")
     env = SREOpenEnv(seed=42)
     state = env.reset()
 

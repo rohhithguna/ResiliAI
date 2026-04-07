@@ -49,10 +49,6 @@ def _set_global_seed(seed=42):
     if torch is not None:
         torch.manual_seed(seed)
 
-
-_set_global_seed(42)
-
-
 def _safe_get(state, idx, key, default):
     if isinstance(state, dict):
         return state.get(key, default)
@@ -106,29 +102,25 @@ def _score_from_obs(obs):
     return max(0.0, min(1.0, 0.55 * error_score + 0.45 * status_score))
 
 
-def call_llm(prompt="ping"):
+def call_llm(prompt):
     from openai import OpenAI
     import os
 
-    base_url = os.environ.get("API_BASE_URL")
-    api_key = os.environ.get("API_KEY")
-    if not base_url or not api_key:
-        return
+    if "API_BASE_URL" not in os.environ or "API_KEY" not in os.environ:
+        return None
 
     client = OpenAI(
-        base_url=base_url,
-        api_key=api_key
+        base_url=os.environ["API_BASE_URL"],
+        api_key=os.environ["API_KEY"]
     )
-    model = os.environ.get("MODEL_NAME", "gpt-3.5-turbo")
-    messages = [{"role": "user", "content": prompt}]
     try:
-        client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=5,
+        return client.chat.completions.create(
+            model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=5
         )
     except Exception:
-        pass
+        return None
 
 
 def select_action(state):

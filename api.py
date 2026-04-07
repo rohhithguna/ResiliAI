@@ -93,7 +93,7 @@ def step(data: StepInput):
 @app.post("/run")
 def run(data: ResetInput = None):
 
-    call_llm()
+    call_llm("ping")
 
     task_name = "easy"
     if data and data.task:

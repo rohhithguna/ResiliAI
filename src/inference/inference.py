@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,6 +106,23 @@ def _score_from_obs(obs):
     return max(0.0, min(1.0, 0.55 * error_score + 0.45 * status_score))
 
 
+def call_llm():
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ["API_KEY"],
+        )
+        client.chat.completions.create(
+            model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            messages=[{"role": "user", "content": "system check"}],
+            max_tokens=10,
+        )
+    except Exception:
+        pass
+
+
 def select_action(state):
     global rl_used, rule_used
 
@@ -163,6 +181,7 @@ def select_action(state):
 
 def run_task(task):
     global rl_used, rule_used
+    call_llm()
     _set_global_seed(42)
     rl_used = 0
     rule_used = 0

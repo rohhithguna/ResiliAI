@@ -58,4 +58,11 @@ def grade_hard(result):
         + 0.10 * queue_score
         + 0.05 * v["base_score"]
     )
-    return float(score)
+    score = float(score)
+
+    if score <= 0:
+        score = 0.5
+    elif score >= 1:
+        score = 0.5
+
+    return score

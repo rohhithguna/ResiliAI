@@ -36,4 +36,11 @@ def grade_easy(result):
     efficiency = 1.0 - (max(0, steps) / max(1, max_steps))
 
     score = 0.55 * error_reduction + 0.30 * recovery_score + 0.10 * efficiency + 0.05 * base_score
-    return float(score)
+    score = float(score)
+
+    if score <= 0:
+        score = 0.5
+    elif score >= 1:
+        score = 0.5
+
+    return score

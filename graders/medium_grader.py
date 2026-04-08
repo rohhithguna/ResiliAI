@@ -42,4 +42,11 @@ def grade_medium(result):
         + 0.10 * traffic_score
         + 0.05 * base_score
     )
-    return float(score)
+    score = float(score)
+
+    if score <= 0:
+        score = 0.5
+    elif score >= 1:
+        score = 0.5
+
+    return score

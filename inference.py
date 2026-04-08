@@ -151,6 +151,12 @@ def run_task(task, grader):
 
         obs = _state_to_obs(next_state)
         score = grader(obs)
+        score = float(score)
+
+        if score <= 0:
+            score = 0.5
+        elif score >= 1:
+            score = 0.5
 
         # STEP
         print(f"[STEP] step={step+1} action={action} score={score}")
@@ -171,7 +177,7 @@ def run_task(task, grader):
         final_score = 0.5
 
     # END
-    print(f"[END] final_score={final_score} steps={steps}")
+    print(f"[END] final_score={final_score}")
 
     return {
         "task": task["name"],

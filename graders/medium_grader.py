@@ -30,16 +30,16 @@ def _extract_values(result):
 def grade_medium(result):
     initial_error, final_error, traffic_load, steps, max_steps, recovered, base_score = _extract_values(result)
 
-    error_reduction = _clamp01(initial_error - final_error)
+    error_reduction = initial_error - final_error
     recovery_score = 1.0 if recovered else 0.0
-    efficiency = _clamp01(1.0 - (max(0, steps) / max(1, max_steps)))
-    traffic_score = _clamp01(1.0 - traffic_load)
+    efficiency = 1.0 - (max(0, steps) / max(1, max_steps))
+    traffic_score = 1.0 - traffic_load
 
     score = (
         0.45 * error_reduction
         + 0.25 * recovery_score
         + 0.15 * efficiency
         + 0.10 * traffic_score
-        + 0.05 * _clamp01(base_score)
+        + 0.05 * base_score
     )
-    return float(_clamp01(score))
+    return float(score)

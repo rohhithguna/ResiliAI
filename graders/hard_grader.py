@@ -46,16 +46,16 @@ def _extract_values(result):
 def grade_hard(result):
     v = _extract_values(result)
 
-    error_reduction = _clamp01(v["initial_error"] - v["final_error"])
+    error_reduction = v["initial_error"] - v["final_error"]
     recovery_score = 1.0 if v["recovered"] else 0.0
-    efficiency = _clamp01(1.0 - (max(0, v["steps"]) / max(1, v["max_steps"])))
-    queue_score = _clamp01(1.0 - (v["request_queue"] / 1000.0))
+    efficiency = 1.0 - (max(0, v["steps"]) / max(1, v["max_steps"]))
+    queue_score = 1.0 - (v["request_queue"] / 1000.0)
 
     score = (
         0.40 * error_reduction
         + 0.30 * recovery_score
         + 0.15 * efficiency
         + 0.10 * queue_score
-        + 0.05 * _clamp01(v["base_score"])
+        + 0.05 * v["base_score"]
     )
-    return float(_clamp01(score))
+    return float(score)

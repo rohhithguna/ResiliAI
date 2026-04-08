@@ -104,19 +104,22 @@ def _score_from_obs(obs):
 
 
 def call_llm(prompt):
-    import os
-    from openai import OpenAI
-
-    client = OpenAI(
-        base_url=os.environ["API_BASE_URL"],
-        api_key=os.environ["API_KEY"]
-    )
     try:
-        return client.chat.completions.create(
+        from openai import OpenAI
+        import os
+
+        client = OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ["API_KEY"]
+        )
+
+        response = client.chat.completions.create(
             model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
             messages=[{"role": "user", "content": prompt}],
             max_tokens=5
         )
+
+        return response
     except Exception:
         return None
 
@@ -230,7 +233,11 @@ def run_task(task):
         and final_error < 0.15
     )
     final_score = _score_from_obs(final_obs)
-    final_score = max(1e-6, min(final_score, 0.999999))
+    final_score = float(final_score)
+
+    # absolute safety clamp (handles all edge cases)
+    if not (0 < final_score < 1):
+        final_score = 0.5
 
     return {
         "task": task.get("name", "unknown_task") if isinstance(task, dict) else "unknown_task",

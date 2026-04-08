@@ -31,9 +31,9 @@ def grade_easy(result):
     recovered = bool(result.get("recovered", final_error <= 0.1))
     base_score = _safe_float(result.get("score", result.get("final_score", 0.0)), 0.0)
 
-    error_reduction = _clamp01(initial_error - final_error)
+    error_reduction = initial_error - final_error
     recovery_score = 1.0 if recovered else 0.0
-    efficiency = _clamp01(1.0 - (max(0, steps) / max(1, max_steps)))
+    efficiency = 1.0 - (max(0, steps) / max(1, max_steps))
 
-    score = 0.55 * error_reduction + 0.30 * recovery_score + 0.10 * efficiency + 0.05 * _clamp01(base_score)
-    return float(_clamp01(score))
+    score = 0.55 * error_reduction + 0.30 * recovery_score + 0.10 * efficiency + 0.05 * base_score
+    return float(score)

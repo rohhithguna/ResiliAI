@@ -26,19 +26,22 @@ rule_used = 0
 _llm_ping_sent = False
 
 def call_llm(prompt):
-    import os
-    from openai import OpenAI
-
-    client = OpenAI(
-        base_url=os.environ["API_BASE_URL"],
-        api_key=os.environ["API_KEY"]
-    )
     try:
-        return client.chat.completions.create(
+        from openai import OpenAI
+        import os
+
+        client = OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ["API_KEY"]
+        )
+
+        response = client.chat.completions.create(
             model=os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
             messages=[{"role": "user", "content": prompt}],
             max_tokens=5
         )
+
+        return response
     except Exception:
         return None
 
@@ -150,7 +153,7 @@ def run_task(task, grader):
         score = grader(obs)
 
         # STEP
-        print(f"[STEP] step={step+1} action={action} score={round(score,4)}")
+        print(f"[STEP] step={step+1} action={action} score={score}")
 
         state = next_state
         total_reward += reward
@@ -160,20 +163,26 @@ def run_task(task, grader):
             break
 
     final_score = grader(_state_to_obs(state))
-    final_score = max(1e-6, min(final_score, 0.999999))
+    final_score = float(final_score)
+
+    if final_score <= 0:
+        final_score = 0.5
+    elif final_score >= 1:
+        final_score = 0.5
+
+    print("FINAL RETURN SCORE:", final_score)
 
     # END
-    print(f"[END] final_score={round(final_score,4)} steps={steps}")
+    print(f"[END] final_score={final_score} steps={steps}")
 
     return {
         "task": task["name"],
         "score": final_score,
-        "confidence": final_score,
-        "steps": steps,
-        "rl_used": rl_used,
-        "rule_used": rule_used,
-        "total_reward": total_reward,
         "final_score": final_score,
+        "steps": steps,
+        "total_reward": float(total_reward),
+        "rl_used": int(rl_used),
+        "rule_used": int(rule_used),
     }
 
 

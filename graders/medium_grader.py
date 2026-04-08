@@ -42,5 +42,4 @@ def grade_medium(result):
         + 0.10 * traffic_score
         + 0.05 * _clamp01(base_score)
     )
-    score = max(1e-6, min(score, 0.999999))
     return float(_clamp01(score))

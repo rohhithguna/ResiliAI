@@ -170,8 +170,6 @@ def run_task(task, grader):
     elif final_score >= 1:
         final_score = 0.5
 
-    print("FINAL RETURN SCORE:", final_score)
-
     # END
     print(f"[END] final_score={final_score} steps={steps}")
 

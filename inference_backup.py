@@ -70,14 +70,23 @@ def run_task(task, grader):
             break
 
     final_score = grader(_state_to_obs(state))
+    final_score = float(final_score)
+
+    if final_score <= 0:
+        final_score = 0.5
+    elif final_score >= 1:
+        final_score = 0.5
 
     print(f"Final Score: {final_score:.2f}")
 
     return {
         "task": task["name"],
+        "score": final_score,
+        "final_score": final_score,
         "steps": steps,
-        "total_reward": total_reward,
-        "final_score": final_score
+        "total_reward": float(total_reward),
+        "rl_used": int(rl_used),
+        "rule_used": int(rule_used)
     }
 
 

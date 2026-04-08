@@ -235,14 +235,15 @@ def run_task(task):
     final_score = _score_from_obs(final_obs)
     final_score = float(final_score)
 
-    # absolute safety clamp (handles all edge cases)
-    if not (0 < final_score < 1):
+    if final_score <= 0:
+        final_score = 0.5
+    elif final_score >= 1:
         final_score = 0.5
 
     return {
         "task": task.get("name", "unknown_task") if isinstance(task, dict) else "unknown_task",
-        "score": float(final_score),
-        "final_score": float(final_score),
+        "score": final_score,
+        "final_score": final_score,
         "steps": int(steps),
         "final_error": float(final_error),
         "initial_error": float(initial_error),
